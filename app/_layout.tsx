@@ -10,8 +10,8 @@ import { TenantsProvider } from '@/context/TenantsContext';
 import { MaintenanceProvider } from '@/context/MaintenanceContext';
 import { FinancialsProvider } from '@/context/FinancialsContext';
 import { theme } from '@/theme';
+import { StatusBar } from 'expo-status-bar';
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 const queryClient = new QueryClient();
@@ -42,6 +42,7 @@ export default function RootLayout() {
               <GestureHandlerRootView>
                 <MaintenanceProvider>
                   <FinancialsProvider>
+                    <StatusBar style="dark" />
                     <RootLayoutNav />
                   </FinancialsProvider>
                 </MaintenanceProvider>
