@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { Alert, StyleSheet, View, ScrollView } from 'react-native';
-import { Button, Divider, List, SegmentedButtons, Surface, Text } from 'react-native-paper';
+import { Button, Divider, List, SegmentedButtons, Surface, Text, Portal, Modal } from 'react-native-paper';
 import { Stack, router } from 'expo-router';
 import { useDocumentTemplates } from '@/context/DocumentTemplatesContext';
 import { useFilledDocuments } from '@/context/FilledDocumentsContext';
@@ -202,20 +202,24 @@ export default function DocumentsMainScreen() {
         </Surface>
       )}
 
-      {viewer ? (
-        <Surface style={styles.viewer} elevation={2} testID="documentViewer">
-          <View style={[styles.row, { justifyContent: 'space-between' }]}>
-            <Text variant="titleMedium">{viewer.title}</Text>
-            <Button mode="text" onPress={() => setViewer(null)} testID="closeViewer">
-              <Text>Close</Text>
-            </Button>
-          </View>
-          <Divider />
-          <View style={{ paddingTop: 8 }}>
-            <Text selectable>{viewer.text}</Text>
-          </View>
-        </Surface>
-      ) : null}
+      <Portal>
+        <Modal visible={!!viewer} onDismiss={() => setViewer(null)} contentContainerStyle={styles.fullscreenModal}>
+          {viewer ? (
+            <Surface style={styles.modalSurface} elevation={2} testID="documentViewer">
+              <View style={[styles.row, { justifyContent: 'space-between' }]}>
+                <Text variant="titleMedium">{viewer.title}</Text>
+                <Button mode="contained-tonal" onPress={() => setViewer(null)} testID="closeViewer">
+                  <Text>Close</Text>
+                </Button>
+              </View>
+              <Divider />
+              <ScrollView style={styles.modalScroll} contentContainerStyle={{ paddingBottom: 24 }}>
+                <Text selectable>{viewer.text}</Text>
+              </ScrollView>
+            </Surface>
+          ) : null}
+        </Modal>
+      </Portal>
     </ScrollView>
   );
 }
@@ -226,14 +230,17 @@ const styles = StyleSheet.create({
   title: { fontWeight: '700' as const },
   subtitle: { color: '#6b7280' },
   row: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  viewer: {
-    position: 'absolute',
-    left: 16,
-    right: 16,
-    bottom: 16,
-    maxHeight: 360,
-    borderRadius: 12,
-    padding: 12,
+  fullscreenModal: {
+    marginHorizontal: 12,
+    marginVertical: 12,
+  },
+  modalSurface: {
+    height: '88%',
+    borderRadius: 16,
+    padding: 16,
     backgroundColor: '#fff',
+  },
+  modalScroll: {
+    marginTop: 8,
   },
 });
