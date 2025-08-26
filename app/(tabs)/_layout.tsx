@@ -1,6 +1,6 @@
 import { Tabs } from "expo-router";
 import React from "react";
-import { Home, Users, Wrench, DollarSign } from "lucide-react-native";
+import { Home, Users, Wrench, DollarSign, FileText } from "lucide-react-native";
 import { useTheme } from 'react-native-paper';
 
 export default function TabLayout() {
@@ -17,8 +17,7 @@ export default function TabLayout() {
           borderTopColor: theme.colors.surfaceVariant,
           borderTopWidth: 1,
           height: 60,
-          paddingBottom: 8,
-          paddingTop: 8,
+          paddingTop: 10,
         },
         tabBarLabelStyle: {
           fontSize: 12,
@@ -52,6 +51,13 @@ export default function TabLayout() {
         options={{
           title: "Financials",
           tabBarIcon: ({ color, size }) => <DollarSign color={color} size={size} />,
+        }}
+      />
+      <Tabs.Screen
+        name="documents"
+        options={{
+          title: "Documents",
+          tabBarIcon: ({ color, size }) => <FileText color={color} size={size} />,
         }}
       />
     </Tabs>
