@@ -9,7 +9,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function DocumentsMainScreen() {
   const [segment, setSegment] = useState<'templates' | 'saved'>('templates');
-  const { templates, deleteTemplate } = useDocumentTemplates();
+  const { allTemplates, deleteTemplate } = useDocumentTemplates();
   const { records, deleteRecord } = useFilledDocuments();
   const { properties } = useProperties();
   const insets = useSafeAreaInsets();
@@ -29,7 +29,8 @@ export default function DocumentsMainScreen() {
     router.push({ pathname: '/documents/builder', params: { templateId: id } });
   }, []);
 
-  
+  const defaultTemplates = useMemo(() => (allTemplates ?? []).filter(t => t.id?.startsWith('default-')), [allTemplates]);
+  const customTemplates = useMemo(() => (allTemplates ?? []).filter(t => !t.id?.startsWith('default-')), [allTemplates]);
 
   const onDeleteTemplate = useCallback((id: string) => {
     Alert.alert('Delete Template', 'Are you sure you want to delete this template?', [
@@ -116,17 +117,35 @@ export default function DocumentsMainScreen() {
             </Button>
           </View>
           <Divider />
-          <FlatList
-            data={templates}
-            keyExtractor={(item) => item.id}
-            renderItem={renderTemplateItem}
-            ItemSeparatorComponent={Divider}
-            ListEmptyComponent={
-              <View style={{ paddingVertical: 24 }}>
-                <Text style={styles.subtitle}>No templates yet. Create your first template.</Text>
+          <View>
+            <List.Subheader>Standard Templates</List.Subheader>
+            {defaultTemplates.length > 0 ? (
+              <FlatList
+                data={defaultTemplates}
+                keyExtractor={(item) => item.id}
+                renderItem={renderTemplateItem}
+                ItemSeparatorComponent={Divider}
+              />
+            ) : (
+              <View style={{ paddingVertical: 12 }}>
+                <Text style={styles.subtitle}>No standard templates available.</Text>
               </View>
-            }
-          />
+            )}
+
+            <List.Subheader>My Custom Templates</List.Subheader>
+            {customTemplates.length > 0 ? (
+              <FlatList
+                data={customTemplates}
+                keyExtractor={(item) => item.id}
+                renderItem={renderTemplateItem}
+                ItemSeparatorComponent={Divider}
+              />
+            ) : (
+              <View style={{ paddingVertical: 12 }}>
+                <Text style={styles.subtitle}>No custom templates yet. Create your first template.</Text>
+              </View>
+            )}
+          </View>
         </Surface>
       ) : (
         <Surface style={styles.card} elevation={1} testID="savedDocsView">
