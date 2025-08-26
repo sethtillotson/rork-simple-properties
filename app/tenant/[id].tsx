@@ -12,7 +12,7 @@ export default function TenantDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { getTenantById, deleteTenant } = useTenants();
   const { properties } = useProperties();
-  const { templates } = useDocumentTemplates();
+  const { allTemplates } = useDocumentTemplates();
   const [docModalVisible, setDocModalVisible] = React.useState<boolean>(false);
 
   const tenant = getTenantById(String(id));
@@ -99,12 +99,12 @@ export default function TenantDetailsScreen() {
           <Modal visible={docModalVisible} onDismiss={() => setDocModalVisible(false)} contentContainerStyle={{ backgroundColor: '#fff', padding: 16, margin: 20, borderRadius: 12 }}>
             <Text variant="titleMedium" style={{ marginBottom: 12 }}>Select Template</Text>
             <View style={{ gap: 8 }}>
-              {templates.map(t => (
+              {(allTemplates ?? []).map(t => (
                 <Button key={t.id} mode="outlined" onPress={() => { if (tenant) { setDocModalVisible(false); router.push({ pathname: '/documents/fill', params: { templateId: t.id, tenantId: tenant.id, propertyId: tenant.propertyId } }); } }}>
                   <Text>{t.name}</Text>
                 </Button>
               ))}
-              {templates.length === 0 ? (
+              {(allTemplates ?? []).length === 0 ? (
                 <Text style={{ color: '#6b7280' }}>No templates yet. Create one in the Documents tab.</Text>
               ) : null}
             </View>

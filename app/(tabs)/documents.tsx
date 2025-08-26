@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { Alert, FlatList, StyleSheet, View } from 'react-native';
+import { Alert, StyleSheet, View, ScrollView } from 'react-native';
 import { Button, Divider, List, SegmentedButtons, Surface, Text } from 'react-native-paper';
 import { Stack, router } from 'expo-router';
 import { useDocumentTemplates } from '@/context/DocumentTemplatesContext';
@@ -9,7 +9,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function DocumentsMainScreen() {
   const [segment, setSegment] = useState<'templates' | 'saved'>('templates');
-  const { allTemplates, deleteTemplate } = useDocumentTemplates();
+  const { allTemplates, deleteTemplate, addCustomTemplate } = useDocumentTemplates();
   const { records, deleteRecord } = useFilledDocuments();
   const { properties } = useProperties();
   const insets = useSafeAreaInsets();
@@ -48,19 +48,40 @@ export default function DocumentsMainScreen() {
 
   const [viewer, setViewer] = useState<{ id: string; title: string; text: string } | null>(null);
 
-  const renderTemplateItem = ({ item }: { item: { id: string; name: string } }) => (
+  const renderTemplateItem = ({ item, isDefault }: { item: { id: string; name: string; content?: string }; isDefault?: boolean }) => (
     <List.Item
       testID={`template-${item.id}`}
       title={item.name}
       onPress={() => onEditTemplate(item.id)}
       right={() => (
         <View style={styles.row}>
-          <Button mode="text" onPress={() => onEditTemplate(item.id)} testID={`edit-${item.id}`}>
-            <Text>Edit</Text>
-          </Button>
-          <Button mode="text" onPress={() => onDeleteTemplate(item.id)} testID={`delete-${item.id}`}>
-            <Text>Delete</Text>
-          </Button>
+          {isDefault ? (
+            <Button
+              mode="text"
+              onPress={() => {
+                try {
+                  console.log('[Documents] Duplicate template', item.id);
+                  const name = `Copy of ${item.name}`;
+                  const content = (item as any).content ?? '';
+                  addCustomTemplate({ name, content });
+                } catch (e) {
+                  console.error('Duplicate failed', e);
+                }
+              }}
+              testID={`duplicate-${item.id}`}
+            >
+              <Text>Duplicate</Text>
+            </Button>
+          ) : (
+            <>
+              <Button mode="text" onPress={() => onEditTemplate(item.id)} testID={`edit-${item.id}`}>
+                <Text>Edit</Text>
+              </Button>
+              <Button mode="text" onPress={() => onDeleteTemplate(item.id)} testID={`delete-${item.id}`}>
+                <Text>Delete</Text>
+              </Button>
+            </>
+          )}
         </View>
       )}
     />
@@ -88,8 +109,11 @@ export default function DocumentsMainScreen() {
     );
   };
 
+  const [stdExpanded, setStdExpanded] = useState<boolean>(false);
+  const [customExpanded, setCustomExpanded] = useState<boolean>(false);
+
   return (
-    <View style={[styles.container, { paddingTop: insets.top }] }>
+    <ScrollView style={[styles.container, { paddingTop: insets.top }]} contentContainerStyle={{ paddingBottom: 32 }} testID="documentsScroll">
       <Stack.Screen options={{ title: 'Documents' }} />
 
       <View testID="documentsSegmented">
@@ -117,51 +141,64 @@ export default function DocumentsMainScreen() {
             </Button>
           </View>
           <Divider />
-          <View>
-            <List.Subheader>Standard Templates</List.Subheader>
-            {defaultTemplates.length > 0 ? (
-              <FlatList
-                data={defaultTemplates}
-                keyExtractor={(item) => item.id}
-                renderItem={renderTemplateItem}
-                ItemSeparatorComponent={Divider}
-              />
-            ) : (
-              <View style={{ paddingVertical: 12 }}>
-                <Text style={styles.subtitle}>No standard templates available.</Text>
-              </View>
-            )}
+          <List.Section>
+            <List.Accordion
+              title="Standard Templates"
+              expanded={stdExpanded}
+              onPress={() => setStdExpanded(e => !e)}
+              id="std-accordion"
+            >
+              {defaultTemplates.length > 0 ? (
+                defaultTemplates.map((item) => (
+                  <View key={item.id}>
+                    {renderTemplateItem({ item, isDefault: true })}
+                    <Divider />
+                  </View>
+                ))
+              ) : (
+                <View style={{ paddingVertical: 12 }}>
+                  <Text style={styles.subtitle}>No standard templates available.</Text>
+                </View>
+              )}
+            </List.Accordion>
 
-            <List.Subheader>My Custom Templates</List.Subheader>
-            {customTemplates.length > 0 ? (
-              <FlatList
-                data={customTemplates}
-                keyExtractor={(item) => item.id}
-                renderItem={renderTemplateItem}
-                ItemSeparatorComponent={Divider}
-              />
-            ) : (
-              <View style={{ paddingVertical: 12 }}>
-                <Text style={styles.subtitle}>No custom templates yet. Create your first template.</Text>
-              </View>
-            )}
-          </View>
+            <List.Accordion
+              title="My Custom Templates"
+              expanded={customExpanded}
+              onPress={() => setCustomExpanded(e => !e)}
+              id="custom-accordion"
+            >
+              {customTemplates.length > 0 ? (
+                customTemplates.map((item) => (
+                  <View key={item.id}>
+                    {renderTemplateItem({ item })}
+                    <Divider />
+                  </View>
+                ))
+              ) : (
+                <View style={{ paddingVertical: 12 }}>
+                  <Text style={styles.subtitle}>No custom templates yet. Create your first template.</Text>
+                </View>
+              )}
+            </List.Accordion>
+          </List.Section>
         </Surface>
       ) : (
         <Surface style={styles.card} elevation={1} testID="savedDocsView">
           <Text variant="titleMedium" style={{ marginBottom: 8 }}>Saved Documents</Text>
           <Divider />
-          <FlatList
-            data={records}
-            keyExtractor={(item) => item.id}
-            renderItem={renderRecordItem}
-            ItemSeparatorComponent={Divider}
-            ListEmptyComponent={
-              <View style={{ paddingVertical: 24 }}>
-                <Text style={styles.subtitle}>No saved documents yet.</Text>
+          {(records ?? []).length > 0 ? (
+            (records ?? []).map((rec) => (
+              <View key={rec.id}>
+                {renderRecordItem({ item: rec })}
+                <Divider />
               </View>
-            }
-          />
+            ))
+          ) : (
+            <View style={{ paddingVertical: 24 }}>
+              <Text style={styles.subtitle}>No saved documents yet.</Text>
+            </View>
+          )}
         </Surface>
       )}
 
@@ -179,7 +216,7 @@ export default function DocumentsMainScreen() {
           </View>
         </Surface>
       ) : null}
-    </View>
+    </ScrollView>
   );
 }
 

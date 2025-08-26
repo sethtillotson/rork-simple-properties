@@ -70,7 +70,7 @@ export default function PropertyDetailsScreen() {
   const property = useMemo(() => (typeof id === 'string' ? getPropertyById(id) : undefined), [id, getPropertyById]);
   const { allTemplates } = useChecklistTemplates();
   const { tenants } = useTenants();
-  const { templates } = useDocumentTemplates();
+  const { allTemplates: allDocTemplates } = useDocumentTemplates();
 
   const selectedChecklist = useMemo(() => {
     if (!property) return null;
@@ -887,7 +887,7 @@ export default function PropertyDetailsScreen() {
             <Text variant="titleMedium" style={styles.mb12}>Select Template</Text>
             <KeyboardAwareScrollView enableOnAndroid={true} keyboardShouldPersistTaps="handled" extraScrollHeight={12}>
               <View style={{ gap: 8 }}>
-                {templates.map((tpl) => (
+                {(allDocTemplates ?? []).map((tpl) => (
                   <Button
                     key={tpl.id}
                     mode="outlined"
@@ -904,7 +904,7 @@ export default function PropertyDetailsScreen() {
                     <Text>{tpl.name}</Text>
                   </Button>
                 ))}
-                {templates.length === 0 ? (
+                {(allDocTemplates ?? []).length === 0 ? (
                   <Text style={{ color: '#6b7280' }}>No templates yet. Create one in the Documents tab.</Text>
                 ) : null}
               </View>
