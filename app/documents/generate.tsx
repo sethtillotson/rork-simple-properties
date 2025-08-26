@@ -1,40 +1,37 @@
-import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { StyleSheet, View, ScrollView } from 'react-native';
-import { Stack, useLocalSearchParams, router } from 'expo-router';
-import { Button, Surface, Text, TextInput, Divider, Portal, Modal } from 'react-native-paper';
+import { Stack, useLocalSearchParams } from 'expo-router';
+import { Button, Surface, Text, Divider, ActivityIndicator } from 'react-native-paper';
+import * as Clipboard from 'expo-clipboard';
 import { useDocumentTemplates } from '@/context/DocumentTemplatesContext';
 import { useProperties } from '@/context/PropertiesContext';
 import { useTenants } from '@/context/TenantsContext';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { generateDocument } from '@/services/onDeviceAiService';
 
-function extractPlaceholders(template: string): string[] {
-  const set = new Set<string>();
-  const re = /{{\s*([a-zA-Z0-9_]+)\s*}}/g;
-  let m: RegExpExecArray | null;
-  while ((m = re.exec(template)) !== null) {
-    set.add(m[1]);
+interface Params {
+  templateId?: string;
+  propertyId?: string;
+  tenantId?: string;
+}
+
+function stringify(obj: unknown): string {
+  try {
+    return JSON.stringify(obj ?? null, null, 2);
+  } catch {
+    return String(obj);
   }
-  return Array.from(set);
-}
-
-function humanize(key: string): string {
-  return key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
-}
-
-function fillTemplate(template: string, values: Record<string, string | number | undefined>): string {
-  return template.replace(/{{\s*([a-zA-Z0-9_]+)\s*}}/g, (_match: string, key: string) => {
-    const v = values[key];
-    return v != null ? String(v) : `{{${key}}}`;
-  });
 }
 
 export default function GenerateDocumentScreen() {
-  const { templateId, propertyId, tenantId } = useLocalSearchParams<{ templateId?: string; propertyId?: string; tenantId?: string }>();
+  const params = useLocalSearchParams();
+  const templateId = (params as Record<string, string | string[] | undefined>).templateId as string | undefined;
+  const propertyId = (params as Record<string, string | string[] | undefined>).propertyId as string | undefined;
+  const tenantId = (params as Record<string, string | string[] | undefined>).tenantId as string | undefined;
   const { getById } = useDocumentTemplates();
   const { properties } = useProperties();
   const { getTenantById } = useTenants();
 
-  const template = useMemo(() => getById(String(templateId ?? '')) , [getById, templateId]);
+  const template = useMemo(() => getById(String(templateId ?? '')), [getById, templateId]);
   const tenant = useMemo(() => (tenantId ? getTenantById(String(tenantId)) : undefined), [getTenantById, tenantId]);
   const property = useMemo(() => {
     if (propertyId) return properties.find(p => p.id === propertyId);
@@ -42,107 +39,102 @@ export default function GenerateDocumentScreen() {
     return undefined;
   }, [properties, propertyId, tenant]);
 
-  const knownValues = useMemo<Record<string, string | number | undefined>>(() => {
-    const country = property?.country;
-    const currency = country === 'US' ? '$' : country === 'UK' ? '£' : '';
-    const monthly = property?.monthlyRent != null ? `${currency}${property?.monthlyRent}` : undefined;
-    return {
-      property_address: property ? [property.address, property.city].filter(Boolean).join(', ') : undefined,
-      tenant_name: tenant?.name ?? undefined,
-      monthly_rent: monthly,
-      current_date: new Date().toLocaleDateString(),
-    };
-  }, [property, tenant]);
-
-  const placeholders = useMemo<string[]>(() => extractPlaceholders(template?.content ?? ''), [template?.content]);
-  const unknownKeys = useMemo<string[]>(() => placeholders.filter(k => knownValues[k] == null), [placeholders, knownValues]);
-
-  const [answers, setAnswers] = useState<Record<string, string>>({});
-  const [preview, setPreview] = useState<string>('');
-  const [showPreview, setShowPreview] = useState<boolean>(false);
+  const [prompt, setPrompt] = useState<string>('');
+  const [output, setOutput] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    setAnswers({});
-  }, [templateId]);
+    const constructPrompt = () => {
+      const blocks: string[] = [];
+      blocks.push(`# Task\nGenerate a professional real-estate document based on the selected template and the provided contextual data.`);
+      blocks.push(`## Template\nName: ${template?.name ?? 'Unknown'}\n---\n${template?.content ?? ''}`);
+      blocks.push(`## Context Data\n- Current Date: ${new Date().toISOString()}\n- Property:\n${stringify(property)}\n- Tenant:\n${stringify(tenant)}`);
+      blocks.push(`## Output Requirements\n- Use concise, clear language.\n- Fill in any missing details with placeholders in brackets like [TO BE PROVIDED].\n- Include headings and bullet points where appropriate.`);
+      return blocks.join('\n\n');
+    };
+    setPrompt(constructPrompt());
+  }, [template?.name, template?.content, property, tenant]);
 
-  const onChangeAnswer = useCallback((key: string, value: string) => {
-    setAnswers(prev => ({ ...prev, [key]: value }));
-  }, []);
+  useEffect(() => {
+    let cancelled = false;
+    const run = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const res = await generateDocument(prompt);
+        if (!cancelled) setOutput(res);
+      } catch (e) {
+        console.error('[GenerateScreen] generation error', e);
+        if (!cancelled) setError('Failed to generate document. Please try again.');
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    if (prompt) void run();
+    return () => { cancelled = true; };
+  }, [prompt]);
 
-  const onPreview = useCallback(() => {
-    const completed = fillTemplate(template?.content ?? '', { ...knownValues, ...answers });
-    setPreview(completed);
-    setShowPreview(true);
-    console.log('[Generator] Preview prepared', { keys: Object.keys({ ...knownValues, ...answers }).length });
-  }, [template?.content, knownValues, answers]);
-
-  const onContinue = useCallback(() => {
-    setShowPreview(false);
-    router.push({ pathname: '/documents/fill', params: { templateId: String(templateId ?? ''), propertyId: property?.id ?? '', tenantId: tenant?.id ?? '', prefilledText: preview } });
-  }, [templateId, property?.id, tenant?.id, preview]);
+  const onCopy = useCallback(async () => {
+    try {
+      await Clipboard.setStringAsync(output ?? '');
+      console.log('[GenerateScreen] Copied to clipboard');
+    } catch (e) {
+      console.error('[GenerateScreen] copy error', e);
+    }
+  }, [output]);
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <View style={styles.container}>
       <Stack.Screen options={{ title: 'Generate Document' }} />
-      <Surface style={styles.card} elevation={1} testID="generatorCard">
-        <Text variant="titleMedium" testID="generatorTitle">{template?.name ?? 'Template'}</Text>
-        <Divider />
-        {unknownKeys.length === 0 ? (
-          <View style={{ paddingVertical: 12 }}>
-            <Text style={styles.helper} testID="noQuestions">No questions needed. Tap Preview to review the completed document.</Text>
+      <Surface style={styles.card} elevation={1} testID="aiGenCard">
+        <Text variant="titleMedium" testID="aiGenTitle">{template?.name ?? 'Document'}</Text>
+        <Divider style={{ marginVertical: 8 }} />
+        {loading ? (
+          <View style={styles.center}>
+            <ActivityIndicator animating={true} />
+            <Text style={styles.muted}>Generating...</Text>
+          </View>
+        ) : error ? (
+          <View style={styles.center}>
+            <Text style={styles.error}>{error}</Text>
+            <Button mode="contained" onPress={() => setPrompt(prompt + '\n')} testID="retryBtn"><Text>Retry</Text></Button>
           </View>
         ) : (
-          <ScrollView style={styles.form} contentContainerStyle={{ paddingBottom: 24 }}>
-            {unknownKeys.map((key) => (
-              <View key={key} style={styles.field} testID={`field-${key}`}>
-                <Text style={styles.label}>{humanize(key)}</Text>
-                <TextInput
-                  mode="outlined"
-                  value={answers[key] ?? ''}
-                  onChangeText={(t) => onChangeAnswer(key, t)}
-                  placeholder={`Enter ${humanize(key)}`}
-                  style={styles.input}
-                />
-              </View>
-            ))}
-          </ScrollView>
+          <>
+            <ScrollView style={styles.scroll} contentContainerStyle={{ paddingBottom: 24 }}>
+              <Text selectable testID="aiGenOutput">{output}</Text>
+            </ScrollView>
+            <View style={styles.row}>
+              <Button mode="contained" onPress={onCopy} testID="copyBtn" style={{ flex: 1, marginRight: 8 }}>
+                <Text>Copy Text</Text>
+              </Button>
+              <Button mode="outlined" onPress={() => setOutput('')} testID="clearBtn" style={{ flex: 1 }}>
+                <Text>Clear</Text>
+              </Button>
+            </View>
+          </>
         )}
-        <Button mode="contained" onPress={onPreview} testID="previewBtn">
-          <Text>Preview Document</Text>
-        </Button>
       </Surface>
 
-      <Portal>
-        <Modal visible={showPreview} onDismiss={() => setShowPreview(false)} contentContainerStyle={styles.modalWrap}>
-          <Surface elevation={2} style={styles.modalSurface} testID="previewModal">
-            <View style={[styles.row, { justifyContent: 'space-between' }]}>
-              <Text variant="titleMedium">Preview</Text>
-              <Button mode="text" onPress={() => setShowPreview(false)} testID="closePreview"><Text>Close</Text></Button>
-            </View>
-            <Divider />
-            <ScrollView style={styles.modalScroll} contentContainerStyle={{ paddingBottom: 24 }}>
-              <Text selectable>{preview}</Text>
-            </ScrollView>
-            <Button mode="contained" onPress={onContinue} testID="continueBtn" style={{ marginTop: 12 }}>
-              <Text>Continue</Text>
-            </Button>
-          </Surface>
-        </Modal>
-      </Portal>
-    </SafeAreaView>
+      <Surface style={styles.promptSurface} elevation={0} testID="promptPreview">
+        <Text variant="labelMedium" style={styles.muted}>Prompt (debug)</Text>
+        <ScrollView style={styles.promptScroll}>
+          <Text selectable>{prompt}</Text>
+        </ScrollView>
+      </Surface>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f4f6f8', padding: 16 },
-  card: { padding: 12, gap: 12, borderRadius: 12, backgroundColor: '#fff', flex: 1 },
-  helper: { color: '#6b7280' },
-  form: { maxHeight: 420 },
-  field: { marginBottom: 12 },
-  label: { marginBottom: 6, color: '#374151' },
-  input: { backgroundColor: '#ffffff' },
-  row: { flexDirection: 'row', alignItems: 'center' },
-  modalWrap: { margin: 12 },
-  modalSurface: { padding: 16, borderRadius: 16, backgroundColor: '#fff', height: '85%' },
-  modalScroll: { marginTop: 8 },
+  container: { flex: 1, backgroundColor: '#f4f6f8' },
+  card: { margin: 16, padding: 12, borderRadius: 12, backgroundColor: '#fff', flex: 1 },
+  center: { alignItems: 'center', justifyContent: 'center', paddingVertical: 24, gap: 8 },
+  muted: { color: '#6b7280' },
+  error: { color: '#b91c1c' },
+  scroll: { flex: 1 },
+  row: { flexDirection: 'row', alignItems: 'center', marginTop: 12 },
+  promptSurface: { marginHorizontal: 16, marginBottom: 16, padding: 12, borderRadius: 12, backgroundColor: '#fff' },
+  promptScroll: { maxHeight: 160 },
 });
