@@ -1,10 +1,12 @@
 import React, { useMemo } from 'react';
 import { StyleSheet, View, Alert } from 'react-native';
 import { Stack, useLocalSearchParams, router } from 'expo-router';
-import { Surface, Text, Button, useTheme, Divider, Avatar } from 'react-native-paper';
+import { Surface, Text, Button, useTheme, Divider, Avatar, Portal, Modal } from 'react-native-paper';
 import { useTenants } from '@/context/TenantsContext';
 import { useProperties } from '@/context/PropertiesContext';
 import { Mail, Phone, HomeIcon, Calendar, User } from 'lucide-react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { documentTemplates, type DocumentTemplate } from '@/utils/documentTemplates';
 
 export default function TenantDetailsScreen() {
   const theme = useTheme();
@@ -14,6 +16,7 @@ export default function TenantDetailsScreen() {
 
   const tenant = getTenantById(String(id));
   const property = useMemo(() => properties.find(p => p.id === tenant?.propertyId), [properties, tenant?.propertyId]);
+  const [docModalVisible, setDocModalVisible] = React.useState<boolean>(false);
 
   return (
     <View style={styles.container}>
@@ -57,6 +60,13 @@ export default function TenantDetailsScreen() {
             <Text>Edit</Text>
           </Button>
           <Button
+            testID="generateTenantDocBtn"
+            mode="outlined"
+            onPress={() => setDocModalVisible(true)}
+          >
+            <Text>Generate Document</Text>
+          </Button>
+          <Button
             testID="deleteTenantBtn"
             mode="contained"
             style={styles.deleteBtn}
@@ -86,6 +96,42 @@ export default function TenantDetailsScreen() {
           </Button>
         </View>
       </Surface>
+      <Portal>
+        <Modal visible={docModalVisible} onDismiss={() => setDocModalVisible(false)} contentContainerStyle={{ backgroundColor: '#fff', margin: 20, padding: 16, borderRadius: 12 }}>
+          {!tenant ? (
+            <View />
+          ) : (
+            <View>
+              <Text variant="titleMedium" style={{ marginBottom: 12 }}>Select a Template</Text>
+              <KeyboardAwareScrollView enableOnAndroid={true} keyboardShouldPersistTaps="handled" extraScrollHeight={12}>
+                <View style={{ gap: 8 }}>
+                  {documentTemplates.map((tpl: DocumentTemplate) => (
+                    <Button
+                      key={tpl.name}
+                      mode="outlined"
+                      testID={`tenantDocTpl-${tpl.name.replace(/\s+/g, '-')}`}
+                      onPress={() => {
+                        const t = tenant;
+                        const p = property;
+                        const prompt = `You are an expert real-estate assistant generating a professional document.\n\nTemplate: ${tpl.name}\nPurpose: ${tpl.content}\n\nContext: Tenant Basics:\n- Name: ${t?.name ?? '-'}\n- Email: ${t?.email ?? '-'}\n- Phone: ${t?.phone ?? '-'}\n- Lease End: ${t?.leaseEndDate ?? '-'}\nProperty: ${p ? `${p.address}, ${p.city}, ${p.province} ${p.postalCode}` : 'N/A'}\n\nInstructions:\n- Write clear, structured sections.\n- Include relevant specifics from context.\n- Keep to 1-2 pages equivalent.`;
+                        setDocModalVisible(false);
+                        router.push({ pathname: '/documents/viewer', params: { prompt } });
+                      }}
+                    >
+                      <Text>{tpl.name}</Text>
+                    </Button>
+                  ))}
+                </View>
+              </KeyboardAwareScrollView>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 12 }}>
+                <Button mode="text" onPress={() => setDocModalVisible(false)}>
+                  <Text>Close</Text>
+                </Button>
+              </View>
+            </View>
+          )}
+        </Modal>
+      </Portal>
     </View>
   );
 }

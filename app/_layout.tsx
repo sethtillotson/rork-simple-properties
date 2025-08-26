@@ -23,6 +23,7 @@ function RootLayoutNav() {
       <Stack.Screen name="modal" options={{ presentation: 'modal', headerShown: false }} />
       <Stack.Screen name="maintenance/[id]" options={{ title: 'Maintenance Details' }} />
       <Stack.Screen name="checklists/builder" options={{ presentation: 'modal', title: 'Checklist Builder' }} />
+      <Stack.Screen name="documents/viewer" options={{ title: 'Document Viewer', presentation: 'card' }} />
     </Stack>
   );
 }

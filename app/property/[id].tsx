@@ -9,6 +9,7 @@ import { Button, Chip, Surface, Text, useTheme, List, Portal, Modal, TextInput, 
 import { useProperties } from '@/context/PropertiesContext';
 import { useDataService } from '@/hooks/useDataService';
 import type { Utility, Insurance, Tax, Loan, Property, Checklist } from '@/types/property';
+import { documentTemplates, type DocumentTemplate } from '@/utils/documentTemplates';
 
 export default function PropertyDetailsScreen() {
   const { id } = useLocalSearchParams<{ id?: string }>();
@@ -60,6 +61,8 @@ export default function PropertyDetailsScreen() {
   const [checklistsExpanded, setChecklistsExpanded] = useState<boolean>(false);
   const [checklistModalVisible, setChecklistModalVisible] = useState<boolean>(false);
   const [selectedChecklistId, setSelectedChecklistId] = useState<string | null>(null);
+
+  const [docModalVisible, setDocModalVisible] = useState<boolean>(false);
 
   const property = useMemo(() => (typeof id === 'string' ? getPropertyById(id) : undefined), [id, getPropertyById]);
   const { allTemplates } = useChecklistTemplates();
@@ -393,6 +396,11 @@ export default function PropertyDetailsScreen() {
                 </Button>
                 <Button mode="outlined" onPress={onDelete} testID="inlineDeleteBtn" style={styles.flex1} textColor={theme.colors.error}>
                   <Text>Delete</Text>
+                </Button>
+              </View>
+              <View style={styles.inlineActions}>
+                <Button mode="contained" onPress={() => setDocModalVisible(true)} testID="generateDocBtn" style={styles.flex1}>
+                  <Text>Generate Document</Text>
                 </Button>
               </View>
 
@@ -851,6 +859,40 @@ export default function PropertyDetailsScreen() {
       </Portal>
 
       <Portal>
+        <Modal visible={docModalVisible} onDismiss={() => setDocModalVisible(false)} contentContainerStyle={styles.modalContent}>
+          {!property ? (
+            <View />
+          ) : (
+            <View>
+              <Text variant="titleMedium" style={styles.mb12}>Select a Template</Text>
+              <KeyboardAwareScrollView enableOnAndroid={true} keyboardShouldPersistTaps="handled" extraScrollHeight={12}>
+                <View style={{ gap: 8 }}>
+                  {documentTemplates.map((tpl: DocumentTemplate) => (
+                    <Button
+                      key={tpl.name}
+                      mode="outlined"
+                      testID={`docTpl-${tpl.name.replace(/\s+/g, '-')}`}
+                      onPress={() => {
+                        const p = property as Property;
+                        const prompt = `You are an expert real-estate assistant generating a professional document.\n\nTemplate: ${tpl.name}\nPurpose: ${tpl.content}\n\nContext:\nProperty Basics:\n- Address: ${p.address}, ${p.city}, ${p.province}, ${p.postalCode}, ${p.country}\n- Bedrooms: ${p.bedrooms ?? '-'}\n- Bathrooms: ${p.bathrooms ?? '-'}\n- Square Feet: ${p.squareFeet ?? '-'}\n- Monthly Rent: ${p.monthlyRent ?? '-'}\n- Occupied: ${p.isOccupied ? 'Yes' : 'No'}\n- Purchase Price: ${p.purchasePrice ?? '-'}\n- Cash Invested: ${p.cashInvested ?? '-'}\n\nUtilities (${(p.utilities ?? []).length}): ${ (p.utilities ?? []).map(u => `${u.provider} acct ${u.accountNumber}${u.paymentDayOfMonth ? ` pay day ${u.paymentDayOfMonth}` : ''}`).join('; ') }\nInsurances (${(p.insurances ?? []).length}): ${ (p.insurances ?? []).map(i => `${i.provider} policy ${i.policyNumber} renew ${i.renewalDate} annual ${i.annualCost}`).join('; ') }\nTaxes (${(p.taxes ?? []).length}): ${ (p.taxes ?? []).map(t => `${t.authority} due ${t.dueDate} amt ${t.amount}`).join('; ') }\nLoans (${(p.loans ?? []).length}): ${ (p.loans ?? []).map(l => `${l.lender} monthly ${l.monthlyPayment} rate ${l.interestRate}% term ${l.loanTerm}y${l.paymentDayOfMonth ? ` pay day ${l.paymentDayOfMonth}` : ''}`).join('; ') }\n\nChecklists: ${ (p.checklists ?? []).map(c => `${c.templateName}(${c.items.filter(i=>i.isChecked).length}/${c.items.length} done)`).join('; ') }\n\nInstructions:\n- Write clear, structured sections.\n- Include relevant specifics from context.\n- Keep to 1-2 pages equivalent.`;
+                        setDocModalVisible(false);
+                        router.push({ pathname: '/documents/viewer', params: { prompt } });
+                      }}
+                    >
+                      <Text>{tpl.name}</Text>
+                    </Button>
+                  ))}
+                </View>
+              </KeyboardAwareScrollView>
+              <View style={styles.rowBetween}>
+                <Button mode="text" onPress={() => setDocModalVisible(false)}>
+                  <Text>Close</Text>
+                </Button>
+              </View>
+            </View>
+          )}
+        </Modal>
+
         <Modal visible={checklistModalVisible} onDismiss={() => { setChecklistModalVisible(false); setSelectedChecklistId(null); }} contentContainerStyle={styles.modalContent}>
           {!property ? (
             <View />
