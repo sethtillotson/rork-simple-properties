@@ -11,14 +11,13 @@ export default function TabLayout() {
       screenOptions={{
         tabBarActiveTintColor: theme.colors.primary,
         tabBarInactiveTintColor: theme.colors.onSurfaceVariant,
-        headerShown: false,
+        headerShown: true,
         tabBarStyle: {
           backgroundColor: theme.colors.surface,
           borderTopColor: theme.colors.surfaceVariant,
           borderTopWidth: 1,
-          height: 60,
-          paddingBottom: 8,
-          paddingTop: 8,
+          height: 80,
+          paddingTop: 10,
         },
         tabBarLabelStyle: {
           fontSize: 12,
@@ -29,7 +28,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: "Properties",
+          title: "Your Properties",
           tabBarIcon: ({ color, size }) => <Home color={color} size={size} />,
         }}
       />
