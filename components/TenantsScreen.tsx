@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import { StyleSheet, View, FlatList } from 'react-native';
 import { Text, Surface, List, Avatar, Divider, useTheme, FAB, Modal, Portal, TextInput, Button } from 'react-native-paper';
-import { SafeAreaView } from 'react-native-safe-area-context';
+
 import { User, Mail, Phone, Calendar, Plus, Users } from 'lucide-react-native';
 import { useTenants } from '@/context/TenantsContext';
 import { useProperties } from '@/context/PropertiesContext';
@@ -85,7 +85,7 @@ export default function TenantsScreen() {
   ), [tenants.length]);
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <View style={styles.container}>
       <FlatList
         testID="tenantsList"
         data={tenants}
@@ -190,7 +190,7 @@ export default function TenantsScreen() {
           </Surface>
         </Modal>
       </Portal>
-    </SafeAreaView>
+    </View>
   );
 }
 

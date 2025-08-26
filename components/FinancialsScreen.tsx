@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { StyleSheet, View, ScrollView, Alert } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { Text, Surface, Card, useTheme, Divider, FAB, Portal, Modal, TextInput, Button, SegmentedButtons, IconButton, Dialog } from 'react-native-paper';
-import { SafeAreaView } from 'react-native-safe-area-context';
+
 import { TrendingUp, TrendingDown, DollarSign, Plus, Pencil, Trash2, Wallet } from 'lucide-react-native';
 import { useFinancials } from '@/context/FinancialsContext';
 import { useProperties } from '@/context/PropertiesContext';
@@ -55,7 +55,7 @@ export default function FinancialsScreen() {
   }, [description, amount, propertyId, type, editingId, addTransaction, updateTransaction, resetForm, closeModal, dateStr]);
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <View style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <Surface style={styles.headerSurface} elevation={0}>
           <Text variant="headlineMedium" style={styles.headerTitle}>
@@ -276,7 +276,7 @@ export default function FinancialsScreen() {
           </Dialog.Actions>
         </Dialog>
       </Portal>
-    </SafeAreaView>
+    </View>
   );
 }
 

@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { StyleSheet, View, ScrollView } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { Text, Surface, Card, Chip, useTheme, FAB, Portal, Modal, TextInput, Button, SegmentedButtons } from 'react-native-paper';
-import { SafeAreaView } from 'react-native-safe-area-context';
+
 import { AlertCircle, Clock, CheckCircle, Plus, Wrench } from 'lucide-react-native';
 import { useMaintenance } from '@/context/MaintenanceContext';
 import { useProperties } from '@/context/PropertiesContext';
@@ -116,7 +116,7 @@ export default function MaintenanceScreen() {
   }, [params.editId]);
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <View style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <Surface style={styles.headerSurface} elevation={0}>
           <Text variant="headlineMedium" style={styles.headerTitle}>
@@ -253,7 +253,7 @@ export default function MaintenanceScreen() {
           </Surface>
         </Modal>
       </Portal>
-    </SafeAreaView>
+    </View>
   );
 }
 

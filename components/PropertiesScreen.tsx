@@ -3,7 +3,7 @@ import { StyleSheet, View, FlatList } from 'react-native';
 import { Card, FAB, Text, Chip, Surface, useTheme } from 'react-native-paper';
 import { useProperties } from '@/context/PropertiesContext';
 import { Property } from '@/types/property';
-import { SafeAreaView } from 'react-native-safe-area-context';
+
 import { router } from 'expo-router';
 import EmptyState from '@/components/EmptyState';
 import { Home } from 'lucide-react-native';
@@ -84,7 +84,7 @@ export default function PropertiesScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <View style={styles.container}>
       <FlatList
         data={properties}
         renderItem={renderProperty}
@@ -107,7 +107,7 @@ export default function PropertiesScreen() {
         onPress={() => router.push('/modal')}
         color={theme.colors.onPrimary}
       />
-    </SafeAreaView>
+    </View>
   );
 }
 
