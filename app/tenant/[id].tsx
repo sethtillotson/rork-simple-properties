@@ -1,10 +1,9 @@
 import React, { useMemo } from 'react';
 import { StyleSheet, View, Alert } from 'react-native';
 import { Stack, useLocalSearchParams, router } from 'expo-router';
-import { Surface, Text, Button, useTheme, Divider, Avatar, Portal, Modal } from 'react-native-paper';
+import { Surface, Text, Button, useTheme, Divider, Avatar } from 'react-native-paper';
 import { useTenants } from '@/context/TenantsContext';
 import { useProperties } from '@/context/PropertiesContext';
-import { useDocumentTemplates } from '@/context/DocumentTemplatesContext';
 import { Mail, Phone, HomeIcon, Calendar, User } from 'lucide-react-native';
 
 export default function TenantDetailsScreen() {
@@ -12,8 +11,6 @@ export default function TenantDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { getTenantById, deleteTenant } = useTenants();
   const { properties } = useProperties();
-  const { allTemplates } = useDocumentTemplates();
-  const [docModalVisible, setDocModalVisible] = React.useState<boolean>(false);
 
   const tenant = getTenantById(String(id));
   const property = useMemo(() => properties.find(p => p.id === tenant?.propertyId), [properties, tenant?.propertyId]);
@@ -88,28 +85,6 @@ export default function TenantDetailsScreen() {
             <Text>Delete</Text>
           </Button>
         </View>
-
-        <View style={styles.actions}>
-          <Button mode="contained" onPress={() => setDocModalVisible(true)} testID="tenantGenerateDocBtn">
-            <Text>Generate Document</Text>
-          </Button>
-        </View>
-
-        <Portal>
-          <Modal visible={docModalVisible} onDismiss={() => setDocModalVisible(false)} contentContainerStyle={{ backgroundColor: '#fff', padding: 16, margin: 20, borderRadius: 12 }}>
-            <Text variant="titleMedium" style={{ marginBottom: 12 }}>Select Template</Text>
-            <View style={{ gap: 8 }}>
-              {(allTemplates ?? []).map(t => (
-                <Button key={t.id} mode="outlined" onPress={() => { if (tenant) { setDocModalVisible(false); router.push({ pathname: '/documents/fill', params: { templateId: t.id, tenantId: tenant.id, propertyId: tenant.propertyId } }); } }}>
-                  <Text>{t.name}</Text>
-                </Button>
-              ))}
-              {(allTemplates ?? []).length === 0 ? (
-                <Text style={{ color: '#6b7280' }}>No templates yet. Create one in the Documents tab.</Text>
-              ) : null}
-            </View>
-          </Modal>
-        </Portal>
       </Surface>
     </View>
   );

@@ -4,13 +4,11 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import CashFlowQuadrant from '@/components/CashFlowQuadrant';
 import { useChecklistTemplates } from '@/context/ChecklistTemplatesContext';
 import type { AnyChecklistTemplate } from '@/context/ChecklistTemplatesContext';
-import { useDocumentTemplates } from '@/context/DocumentTemplatesContext';
 import { Stack, useLocalSearchParams, router } from 'expo-router';
 import { Button, Chip, Surface, Text, useTheme, List, Portal, Modal, TextInput, Checkbox } from 'react-native-paper';
 import { useProperties } from '@/context/PropertiesContext';
 import { useDataService } from '@/hooks/useDataService';
-import { useTenants } from '@/context/TenantsContext';
-import type { Utility, Insurance, Tax, Loan, Property } from '@/types/property';
+import type { Utility, Insurance, Tax, Loan, Property, Checklist } from '@/types/property';
 
 export default function PropertyDetailsScreen() {
   const { id } = useLocalSearchParams<{ id?: string }>();
@@ -63,14 +61,8 @@ export default function PropertyDetailsScreen() {
   const [checklistModalVisible, setChecklistModalVisible] = useState<boolean>(false);
   const [selectedChecklistId, setSelectedChecklistId] = useState<string | null>(null);
 
-  const [docModalVisible, setDocModalVisible] = useState<boolean>(false);
-  const [tenantSelectVisible, setTenantSelectVisible] = useState<boolean>(false);
-  const [selectedTenantIdForDoc, setSelectedTenantIdForDoc] = useState<string | null>(null);
-
   const property = useMemo(() => (typeof id === 'string' ? getPropertyById(id) : undefined), [id, getPropertyById]);
   const { allTemplates } = useChecklistTemplates();
-  const { tenants } = useTenants();
-  const { allTemplates: allDocTemplates } = useDocumentTemplates();
 
   const selectedChecklist = useMemo(() => {
     if (!property) return null;
@@ -401,29 +393,6 @@ export default function PropertyDetailsScreen() {
                 </Button>
                 <Button mode="outlined" onPress={onDelete} testID="inlineDeleteBtn" style={styles.flex1} textColor={theme.colors.error}>
                   <Text>Delete</Text>
-                </Button>
-              </View>
-
-              <View style={[styles.inlineActions, { marginTop: 12 }]}>
-                <Button
-                  mode="contained"
-                  onPress={() => {
-                    if (!property) return;
-                    const related = tenants.filter(t => t.propertyId === property.id);
-                    if (related.length === 0) {
-                      setSelectedTenantIdForDoc(null);
-                      setDocModalVisible(true);
-                    } else if (related.length === 1) {
-                      setSelectedTenantIdForDoc(related[0].id);
-                      setDocModalVisible(true);
-                    } else {
-                      setTenantSelectVisible(true);
-                    }
-                  }}
-                  testID="generateDocBtn"
-                  style={styles.flex1}
-                >
-                  <Text>Generate Document</Text>
                 </Button>
               </View>
 
@@ -877,38 +846,6 @@ export default function PropertyDetailsScreen() {
                 <Text>Save</Text>
               </Button>
             </View>
-          </View>
-        </Modal>
-      </Portal>
-
-      <Portal>
-        <Modal visible={docModalVisible} onDismiss={() => setDocModalVisible(false)} contentContainerStyle={styles.modalContent}>
-          <View>
-            <Text variant="titleMedium" style={styles.mb12}>Select Template</Text>
-            <KeyboardAwareScrollView enableOnAndroid={true} keyboardShouldPersistTaps="handled" extraScrollHeight={12}>
-              <View style={{ gap: 8 }}>
-                {(allDocTemplates ?? []).map((tpl) => (
-                  <Button
-                    key={tpl.id}
-                    mode="outlined"
-                    onPress={() => {
-                      if (property) {
-                        const params: Record<string, string> = { templateId: tpl.id, propertyId: property.id };
-                        if (selectedTenantIdForDoc) params.tenantId = selectedTenantIdForDoc;
-                        setDocModalVisible(false);
-                        router.push({ pathname: '/documents/fill', params });
-                      }
-                    }}
-                    testID={`selectTpl-${tpl.id}`}
-                  >
-                    <Text>{tpl.name}</Text>
-                  </Button>
-                ))}
-                {(allDocTemplates ?? []).length === 0 ? (
-                  <Text style={{ color: '#6b7280' }}>No templates yet. Create one in the Documents tab.</Text>
-                ) : null}
-              </View>
-            </KeyboardAwareScrollView>
           </View>
         </Modal>
       </Portal>
