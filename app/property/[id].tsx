@@ -1,11 +1,12 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { Alert, StyleSheet, View, Image, Pressable } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import CashFlowQuadrant from '@/components/CashFlowQuadrant';
 import { useChecklistTemplates } from '@/context/ChecklistTemplatesContext';
 import type { AnyChecklistTemplate } from '@/context/ChecklistTemplatesContext';
 import { Stack, useLocalSearchParams, router } from 'expo-router';
-import { Button, Chip, Surface, Text, useTheme, List, Portal, Modal, TextInput, Checkbox } from 'react-native-paper';
+import { Button, IconButton, Chip, Surface, Text, useTheme, List, Portal, Modal, TextInput, Checkbox } from 'react-native-paper';
 import { useProperties } from '@/context/PropertiesContext';
 import { useDataService } from '@/hooks/useDataService';
 import type { Utility, Insurance, Tax, Loan, Property, Checklist } from '@/types/property';
@@ -316,24 +317,28 @@ export default function PropertyDetailsScreen() {
     ]);
   }, [property, deleteTaxFromProperty]);
 
+  const insets = useSafeAreaInsets();
+
   return (
-    <>
-      <Stack.Screen
-        options={{
-          title: property?.address ?? 'Property',
-          headerRight: () => (
-            <View style={styles.headerActions}>
-              <Button testID="editPropertyBtn" onPress={onEdit} compact>
-                <Text>Edit</Text>
-              </Button>
-              <Button testID="deletePropertyBtn" onPress={onDelete} compact textColor={theme.colors.error}>
-                <Text>Delete</Text>
-              </Button>
-            </View>
-          ),
-        }}
-      />
-      <KeyboardAwareScrollView style={styles.container} contentContainerStyle={styles.content} enableOnAndroid={true} extraScrollHeight={12}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }}>
+      <Stack.Screen options={{ headerShown: false }} />
+
+      {/* Custom header positioned over the top so the hero image reaches the top of the screen */}
+  <View style={[styles.customHeader, { position: 'absolute', top: 0, left: 0, right: 0, zIndex: 20, paddingTop: insets.top, height: insets.top + 72, backgroundColor: '#ffffff', elevation: 4, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.12, shadowRadius: 4 }]}>
+        <View style={[styles.headerLeft, { alignItems: 'center' }]}> 
+          <IconButton icon="arrow-left" onPress={() => router.back()} />
+          <Text variant="headlineSmall" style={styles.customTitle} numberOfLines={1}>{property?.address ?? 'Property'}</Text>
+        </View>
+        <View style={styles.headerActions}>
+          <Button testID="editPropertyBtn" onPress={onEdit} compact>
+            <Text>Edit</Text>
+          </Button>
+          <Button testID="deletePropertyBtn" onPress={onDelete} compact textColor={theme.colors.error}>
+            <Text>Delete</Text>
+          </Button>
+        </View>
+      </View>
+  <KeyboardAwareScrollView style={[styles.container, { backgroundColor: 'transparent', paddingTop: 0 }]} contentContainerStyle={styles.content} enableOnAndroid={true} extraScrollHeight={12}>
         {!property ? (
           <Surface style={styles.missing} elevation={0}>
             <Text variant="titleMedium">Property not found</Text>
@@ -588,9 +593,8 @@ export default function PropertyDetailsScreen() {
             </Surface>
           </View>
         )}
-      </KeyboardAwareScrollView>
-
-      <Portal>
+  </KeyboardAwareScrollView>
+  <Portal>
         <Modal visible={utilityModalVisible} onDismiss={() => setUtilityModalVisible(false)} contentContainerStyle={styles.modalContent}>
           <View>
             <Text variant="titleMedium" style={styles.mb12}>{editingUtility ? 'Edit Utility' : 'Add Utility'}</Text>
@@ -938,7 +942,7 @@ export default function PropertyDetailsScreen() {
           )}
         </Modal>
       </Portal>
-    </>
+    </SafeAreaView>
   );
 }
 
@@ -974,4 +978,7 @@ const styles = StyleSheet.create({
   dateControls: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   dateValue: { minWidth: 40, textAlign: 'center', fontWeight: '600' as const },
   quadrantWrap: { marginTop: -40 },
+  customHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 12, backgroundColor: '#fff', borderBottomWidth: 1, borderBottomColor: '#eee' },
+  headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 8, maxWidth: '70%' },
+  customTitle: { fontWeight: '600' as const, color: '#111' },
 });

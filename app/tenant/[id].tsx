@@ -1,5 +1,7 @@
 import React, { useMemo } from 'react';
 import { StyleSheet, View, Alert } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { IconButton } from 'react-native-paper';
 import { Stack, useLocalSearchParams, router } from 'expo-router';
 import { Surface, Text, Button, useTheme, Divider, Avatar, Portal, Modal } from 'react-native-paper';
 import { useTenants } from '@/context/TenantsContext';
@@ -18,11 +20,20 @@ export default function TenantDetailsScreen() {
   const property = useMemo(() => properties.find(p => p.id === tenant?.propertyId), [properties, tenant?.propertyId]);
   const [docModalVisible, setDocModalVisible] = React.useState<boolean>(false);
 
-  return (
-    <View style={styles.container}>
-      <Stack.Screen options={{ title: tenant?.name ?? 'Tenant Details' }} />
+  const insets = useSafeAreaInsets();
 
-      <Surface style={styles.card} elevation={1} testID="tenantDetailsCard">
+  return (
+    <SafeAreaView style={styles.container}>
+      <Stack.Screen options={{ headerShown: false }} />
+
+  <View style={[{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 20, paddingTop: insets.top, height: insets.top + 72, paddingHorizontal: 12, backgroundColor: '#ffffff', borderBottomWidth: 1, borderBottomColor: '#eee', elevation: 4, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.12, shadowRadius: 4, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }]}> 
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <IconButton icon="arrow-left" onPress={() => router.back()} />
+          <Text variant="headlineSmall">{tenant?.name ?? 'Tenant Details'}</Text>
+        </View>
+      </View>
+
+  <Surface style={[styles.card, { marginTop: insets.top + 72 }]} elevation={1} testID="tenantDetailsCard">
         <View style={styles.headerRow}>
           <Avatar.Icon size={56} icon={() => <User size={28} color={'white'} />} style={{ backgroundColor: theme.colors.primary }} />
           <View style={styles.headerText}>
@@ -132,7 +143,7 @@ export default function TenantDetailsScreen() {
           )}
         </Modal>
       </Portal>
-    </View>
+  </SafeAreaView>
   );
 }
 

@@ -1,5 +1,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, View } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { IconButton } from 'react-native-paper';
 import { Stack, useLocalSearchParams, router } from 'expo-router';
 import { Button, Chip, SegmentedButtons, Surface, Text, useTheme } from 'react-native-paper';
 import { useMaintenance } from '@/context/MaintenanceContext';
@@ -52,24 +54,28 @@ export default function MaintenanceDetailsScreen() {
     );
   }, [request, deleteMaintenanceRequest]);
 
+  const insets = useSafeAreaInsets();
+
   return (
-    <>
-      <Stack.Screen
-        options={{
-          title: request?.title ?? 'Maintenance',
-          headerRight: () => (
-            <View style={styles.headerActions}>
-              <Button onPress={onEdit} compact>
-                <Text>Edit</Text>
-              </Button>
-              <Button onPress={onDelete} compact textColor={theme.colors.error}>
-                <Text>Delete</Text>
-              </Button>
-            </View>
-          ),
-        }}
-      />
-      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <SafeAreaView style={{ flex: 1 }}>
+      <Stack.Screen options={{ headerShown: false }} />
+
+  <View style={[{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 20, paddingTop: insets.top, height: insets.top + 72, paddingHorizontal: 12, backgroundColor: '#ffffff', borderBottomWidth: 1, borderBottomColor: '#eee', elevation: 4, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.12, shadowRadius: 4, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }]}> 
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <IconButton icon="arrow-left" onPress={() => router.back()} />
+          <Text variant="headlineSmall">{request?.title ?? 'Maintenance'}</Text>
+        </View>
+        <View style={styles.headerActions}>
+          <Button onPress={onEdit} compact>
+            <Text>Edit</Text>
+          </Button>
+          <Button onPress={onDelete} compact textColor={theme.colors.error}>
+            <Text>Delete</Text>
+          </Button>
+        </View>
+      </View>
+
+  <ScrollView style={styles.container} contentContainerStyle={[styles.content, { paddingTop: insets.top + 72 }] }>
         {!request ? (
           <Surface style={styles.missing} elevation={0}>
             <Text variant="titleMedium">Request not found</Text>
@@ -118,7 +124,7 @@ export default function MaintenanceDetailsScreen() {
           </Surface>
         )}
       </ScrollView>
-    </>
+    </SafeAreaView>
   );
 }
 
