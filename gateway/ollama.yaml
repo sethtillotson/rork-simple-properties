@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ollama-gpu
+  namespace: default
+  labels:
+    app: ollama-gpu
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ollama-gpu
+  template:
+    metadata:
+      labels:
+        app: ollama-gpu
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: jetson1
+      containers:
+        - name: ollama
+          image: ollama/ollama:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 11434
+          env:
+            - name: OLLAMA_KEEP_ALIVE
+              value: "5m"
+          volumeMounts:
+            - name: models
+              mountPath: /root/.ollama
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "1Gi"
+            limits:
+              cpu: "2000m"
+              memory: "6Gi"
+      volumes:
+        - name: models
+          hostPath:
+            path: /usr/share/ollama/.ollama
+            type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ollama-gpu
+  namespace: default
+  labels:
+    app: ollama-gpu
+spec:
+  selector:
+    app: ollama-gpu
+  ports:
+    - name: http
+      protocol: TCP
+      port: 11434
+      targetPort: 11434

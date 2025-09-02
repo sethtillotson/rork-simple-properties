@@ -9,6 +9,7 @@ import { useProperties } from '@/context/PropertiesContext';
 import { Mail, Phone, HomeIcon, Calendar, User } from 'lucide-react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { documentTemplates, type DocumentTemplate } from '@/utils/documentTemplates';
+import { buildDocVariables } from '@/utils/docVariables';
 
 export default function TenantDetailsScreen() {
   const theme = useTheme();
@@ -116,15 +117,19 @@ export default function TenantDetailsScreen() {
               <Text variant="titleMedium" style={{ marginBottom: 12 }}>Select a Template</Text>
               <KeyboardAwareScrollView enableOnAndroid={true} keyboardShouldPersistTaps="handled" extraScrollHeight={12}>
                 <View style={{ gap: 8 }}>
-                  {documentTemplates.map((tpl: DocumentTemplate) => (
+      {documentTemplates.map((tpl: DocumentTemplate) => (
                     <Button
                       key={tpl.name}
                       mode="outlined"
                       testID={`tenantDocTpl-${tpl.name.replace(/\s+/g, '-')}`}
                       onPress={() => {
-                        const t = tenant;
-                        const p = property;
-                        const prompt = `You are an expert real-estate assistant generating a professional document.\n\nTemplate: ${tpl.name}\nPurpose: ${tpl.content}\n\nContext: Tenant Basics:\n- Name: ${t?.name ?? '-'}\n- Email: ${t?.email ?? '-'}\n- Phone: ${t?.phone ?? '-'}\n- Lease End: ${t?.leaseEndDate ?? '-'}\nProperty: ${p ? `${p.address}, ${p.city}, ${p.province} ${p.postalCode}` : 'N/A'}\n\nInstructions:\n- Write clear, structured sections.\n- Include relevant specifics from context.\n- Keep to 1-2 pages equivalent.`;
+        const vars = buildDocVariables(property, tenant);
+        const blocks: string[] = [];
+        blocks.push(`# Task\nGenerate a professional real-estate document in VALID HTML based on the selected template and variables.`);
+        blocks.push(`## Template (Markdown)\nName: ${tpl.name}\n---\n${tpl.content}`);
+        blocks.push(`## Variables (JSON)\n${JSON.stringify(vars, null, 2)}`);
+  blocks.push(`## Output Requirements\n- Return ONLY a complete HTML5 document starting with <!doctype html> and enclosing <html><head>...</head><body>...</body></html>.\n- Do NOT include any explanations, prefaces, or code fences in the response. Output the HTML document only.\n- Convert any Markdown in the template to styled HTML (use <h1>-<h3>, <p>, <ul>, <li>, <strong>, <em>, <table> if needed).\n- Interpolate variables where appropriate; if a variable is missing, leave a bracketed placeholder like [TENANT_NAME].\n- No external scripts. Inline minimal CSS in <style> is allowed.\n- Mobile-friendly formatting.`);
+        const prompt = blocks.join('\n\n');
                         setDocModalVisible(false);
                         router.push({ pathname: '/documents/viewer', params: { prompt } });
                       }}

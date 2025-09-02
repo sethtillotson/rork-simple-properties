@@ -7,6 +7,7 @@ import { useDocumentTemplates } from '@/context/DocumentTemplatesContext';
 import { useProperties } from '@/context/PropertiesContext';
 import { useTenants } from '@/context/TenantsContext';
 import { generateDocument } from '@/services/onDeviceAiService';
+import { buildDocVariables } from '@/utils/docVariables';
 
 interface Params {
   templateId?: string;
@@ -47,10 +48,11 @@ export default function GenerateDocumentScreen() {
   useEffect(() => {
     const constructPrompt = () => {
       const blocks: string[] = [];
-      blocks.push(`# Task\nGenerate a professional real-estate document based on the selected template and the provided contextual data.`);
-      blocks.push(`## Template\nName: ${template?.name ?? 'Unknown'}\n---\n${template?.content ?? ''}`);
-      blocks.push(`## Context Data\n- Current Date: ${new Date().toISOString()}\n- Property:\n${stringify(property)}\n- Tenant:\n${stringify(tenant)}`);
-      blocks.push(`## Output Requirements\n- Use concise, clear language.\n- Fill in any missing details with placeholders in brackets like [TO BE PROVIDED].\n- Include headings and bullet points where appropriate.`);
+      const vars = buildDocVariables(property, tenant);
+      blocks.push(`# Task\nGenerate a professional real-estate document in VALID HTML based on the selected template and variables.`);
+      blocks.push(`## Template (Markdown)\nName: ${template?.name ?? 'Unknown'}\n---\n${template?.content ?? ''}`);
+      blocks.push(`## Variables (JSON)\n${stringify(vars)}`);
+  blocks.push(`## Output Requirements\n- Return ONLY a complete HTML5 document starting with <!doctype html> and enclosing <html><head>...</head><body>...</body></html>.\n- Do NOT include any explanations, prefaces, or code fences in the response. Output the HTML document only.\n- Convert any Markdown in the template to styled HTML (use <h1>-<h3>, <p>, <ul>, <li>, <strong>, <em>, <table> if needed).\n- Interpolate variables where appropriate; if a variable is missing, leave a bracketed placeholder like [TENANT_NAME].\n- Use semantic, mobile-friendly formatting and reasonable spacing.`);
       return blocks.join('\n\n');
     };
     setPrompt(constructPrompt());

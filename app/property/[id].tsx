@@ -11,6 +11,7 @@ import { useProperties } from '@/context/PropertiesContext';
 import { useDataService } from '@/hooks/useDataService';
 import type { Utility, Insurance, Tax, Loan, Property, Checklist } from '@/types/property';
 import { documentTemplates, type DocumentTemplate } from '@/utils/documentTemplates';
+import { buildDocVariables } from '@/utils/docVariables';
 
 export default function PropertyDetailsScreen() {
   const { id } = useLocalSearchParams<{ id?: string }>();
@@ -878,7 +879,13 @@ export default function PropertyDetailsScreen() {
                       testID={`docTpl-${tpl.name.replace(/\s+/g, '-')}`}
                       onPress={() => {
                         const p = property as Property;
-                        const prompt = `You are an expert real-estate assistant generating a professional document.\n\nTemplate: ${tpl.name}\nPurpose: ${tpl.content}\n\nContext:\nProperty Basics:\n- Address: ${p.address}, ${p.city}, ${p.province}, ${p.postalCode}, ${p.country}\n- Bedrooms: ${p.bedrooms ?? '-'}\n- Bathrooms: ${p.bathrooms ?? '-'}\n- Square Feet: ${p.squareFeet ?? '-'}\n- Monthly Rent: ${p.monthlyRent ?? '-'}\n- Occupied: ${p.isOccupied ? 'Yes' : 'No'}\n- Purchase Price: ${p.purchasePrice ?? '-'}\n- Cash Invested: ${p.cashInvested ?? '-'}\n\nUtilities (${(p.utilities ?? []).length}): ${ (p.utilities ?? []).map(u => `${u.provider} acct ${u.accountNumber}${u.paymentDayOfMonth ? ` pay day ${u.paymentDayOfMonth}` : ''}`).join('; ') }\nInsurances (${(p.insurances ?? []).length}): ${ (p.insurances ?? []).map(i => `${i.provider} policy ${i.policyNumber} renew ${i.renewalDate} annual ${i.annualCost}`).join('; ') }\nTaxes (${(p.taxes ?? []).length}): ${ (p.taxes ?? []).map(t => `${t.authority} due ${t.dueDate} amt ${t.amount}`).join('; ') }\nLoans (${(p.loans ?? []).length}): ${ (p.loans ?? []).map(l => `${l.lender} monthly ${l.monthlyPayment} rate ${l.interestRate}% term ${l.loanTerm}y${l.paymentDayOfMonth ? ` pay day ${l.paymentDayOfMonth}` : ''}`).join('; ') }\n\nChecklists: ${ (p.checklists ?? []).map(c => `${c.templateName}(${c.items.filter(i=>i.isChecked).length}/${c.items.length} done)`).join('; ') }\n\nInstructions:\n- Write clear, structured sections.\n- Include relevant specifics from context.\n- Keep to 1-2 pages equivalent.`;
+                        const vars = buildDocVariables(p, undefined);
+                        const blocks: string[] = [];
+                        blocks.push(`# Task\nGenerate a professional real-estate document in VALID HTML based on the selected template and variables.`);
+                        blocks.push(`## Template (Markdown)\nName: ${tpl.name}\n---\n${tpl.content}`);
+                        blocks.push(`## Variables (JSON)\n${JSON.stringify(vars, null, 2)}`);
+                        blocks.push(`## Output Requirements\n- Return ONLY a complete HTML5 document starting with <!doctype html> and enclosing <html><head>...</head><body>...</body></html>.\n- Do NOT include any explanations, prefaces, or code fences in the response. Output the HTML document only.\n- Convert any Markdown in the template to styled HTML (use <h1>-<h3>, <p>, <ul>, <li>, <strong>, <em>, <table> if needed).\n- Interpolate variables where appropriate; if a variable is missing, leave a bracketed placeholder.\n- No external scripts. Inline minimal CSS in <style> is allowed.\n- Mobile-friendly formatting.`);
+                        const prompt = blocks.join('\n\n');
                         setDocModalVisible(false);
                         router.push({ pathname: '/documents/viewer', params: { prompt } });
                       }}

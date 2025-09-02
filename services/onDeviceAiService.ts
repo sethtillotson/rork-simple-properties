@@ -1,8 +1,13 @@
+import { generateViaGateway } from '@/services/gatewayClient';
+
 export async function generateDocument(prompt: string): Promise<string> {
   console.log('[onDeviceAiService] generateDocument called with prompt length:', prompt?.length ?? 0);
-  const delayMs = 3000 + Math.floor(Math.random() * 2000);
-  await new Promise((resolve) => setTimeout(resolve, delayMs));
-  const sample = 'AI response will appear here.';
-  console.log('[onDeviceAiService] generation complete after', delayMs, 'ms');
-  return sample;
+  try {
+    const text = await generateViaGateway(prompt, { feature: 'document.generate' });
+    return text;
+  } catch (e) {
+  const msg = (e as Error)?.message || 'unknown error';
+  console.warn('[onDeviceAiService] gateway call failed:', msg);
+  throw new Error(msg);
+  }
 }

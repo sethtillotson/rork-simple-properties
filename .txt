@@ -1,0 +1,201 @@
+Sep 02 04:47:42 jetson1 ollama[185012]: llama_model_loader: loaded meta data with 30 key-value pairs and 147 tensors from /usr/share/ollama/.ollama/models/blobs/sha256-84fffd9ce0ecc7e0a36ec7a3c3aa21bb888213f8bf3db9408d5520a26412f06e (version GGUF V3 (latest))
+Sep 02 04:47:42 jetson1 ollama[185012]: llama_model_loader: Dumping metadata keys/values. Note: KV overrides do not apply in this output.
+Sep 02 04:47:42 jetson1 ollama[185012]: llama_model_loader: - kv   0:                       general.architecture str              = llama
+Sep 02 04:47:42 jetson1 ollama[185012]: llama_model_loader: - kv   1:                               general.type str              = model
+Sep 02 04:47:42 jetson1 ollama[185012]: llama_model_loader: - kv   2:                               general.name str              = Llama 3.2 1B Instruct
+Sep 02 04:47:42 jetson1 ollama[185012]: llama_model_loader: - kv   3:                           general.finetune str              = Instruct
+Sep 02 04:47:42 jetson1 ollama[185012]: llama_model_loader: - kv   4:                           general.basename str              = Llama-3.2
+Sep 02 04:47:42 jetson1 ollama[185012]: llama_model_loader: - kv   5:                         general.size_label str              = 1B
+Sep 02 04:47:42 jetson1 ollama[185012]: llama_model_loader: - kv   6:                               general.tags arr[str,6]       = ["facebook", "meta", "pytorch", "llam...
+Sep 02 04:47:42 jetson1 ollama[185012]: llama_model_loader: - kv   7:                          general.languages arr[str,8]       = ["en", "de", "fr", "it", "pt", "hi", ...
+Sep 02 04:47:42 jetson1 ollama[185012]: llama_model_loader: - kv   8:                          llama.block_count u32              = 16
+Sep 02 04:47:42 jetson1 ollama[185012]: llama_model_loader: - kv   9:                       llama.context_length u32              = 131072
+Sep 02 04:47:42 jetson1 ollama[185012]: llama_model_loader: - kv  10:                     llama.embedding_length u32              = 2048
+Sep 02 04:47:42 jetson1 ollama[185012]: llama_model_loader: - kv  11:                  llama.feed_forward_length u32              = 8192
+Sep 02 04:47:42 jetson1 ollama[185012]: llama_model_loader: - kv  12:                 llama.attention.head_count u32              = 32
+Sep 02 04:47:42 jetson1 ollama[185012]: llama_model_loader: - kv  13:              llama.attention.head_count_kv u32              = 8
+Sep 02 04:47:42 jetson1 ollama[185012]: llama_model_loader: - kv  14:                       llama.rope.freq_base f32              = 500000.000000
+Sep 02 04:47:42 jetson1 ollama[185012]: llama_model_loader: - kv  15:     llama.attention.layer_norm_rms_epsilon f32              = 0.000010
+Sep 02 04:47:42 jetson1 ollama[185012]: llama_model_loader: - kv  16:                 llama.attention.key_length u32              = 64
+Sep 02 04:47:42 jetson1 ollama[185012]: llama_model_loader: - kv  17:               llama.attention.value_length u32              = 64
+Sep 02 04:47:42 jetson1 ollama[185012]: llama_model_loader: - kv  18:                          general.file_type u32              = 15
+Sep 02 04:47:42 jetson1 ollama[185012]: llama_model_loader: - kv  19:                           llama.vocab_size u32              = 128256
+Sep 02 04:47:42 jetson1 ollama[185012]: llama_model_loader: - kv  20:                 llama.rope.dimension_count u32              = 64
+Sep 02 04:47:42 jetson1 ollama[185012]: llama_model_loader: - kv  21:                       tokenizer.ggml.model str              = gpt2
+Sep 02 04:47:42 jetson1 ollama[185012]: llama_model_loader: - kv  22:                         tokenizer.ggml.pre str              = llama-bpe
+Sep 02 04:47:42 jetson1 ollama[185012]: llama_model_loader: - kv  23:                      tokenizer.ggml.tokens arr[str,128256]  = ["!", "\"", "#", "$", "%", "&", "'", ...
+Sep 02 04:47:42 jetson1 ollama[185012]: llama_model_loader: - kv  24:                  tokenizer.ggml.token_type arr[i32,128256]  = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, ...
+Sep 02 04:47:42 jetson1 ollama[185012]: llama_model_loader: - kv  25:                      tokenizer.ggml.merges arr[str,280147]  = ["Ġ Ġ", "Ġ ĠĠĠ", "ĠĠ ĠĠ", "...
+Sep 02 04:47:42 jetson1 ollama[185012]: llama_model_loader: - kv  26:                tokenizer.ggml.bos_token_id u32              = 128000
+Sep 02 04:47:42 jetson1 ollama[185012]: llama_model_loader: - kv  27:                tokenizer.ggml.eos_token_id u32              = 128009
+Sep 02 04:47:42 jetson1 ollama[185012]: llama_model_loader: - kv  28:                    tokenizer.chat_template str              = {{- bos_token }}\n{%- if custom_tools ...
+Sep 02 04:47:42 jetson1 ollama[185012]: llama_model_loader: - kv  29:               general.quantization_version u32              = 2
+Sep 02 04:47:42 jetson1 ollama[185012]: llama_model_loader: - type  f32:   34 tensors
+Sep 02 04:47:42 jetson1 ollama[185012]: llama_model_loader: - type q4_K:   96 tensors
+Sep 02 04:47:42 jetson1 ollama[185012]: llama_model_loader: - type q6_K:   17 tensors
+Sep 02 04:47:42 jetson1 ollama[185012]: print_info: file format = GGUF V3 (latest)
+Sep 02 04:47:42 jetson1 ollama[185012]: print_info: file type   = Q4_K - Medium
+Sep 02 04:47:42 jetson1 ollama[185012]: print_info: file size   = 762.81 MiB (5.18 BPW)
+Sep 02 04:47:43 jetson1 ollama[185012]: load: printing all EOG tokens:
+Sep 02 04:47:43 jetson1 ollama[185012]: load:   - 128001 ('<|end_of_text|>')
+Sep 02 04:47:43 jetson1 ollama[185012]: load:   - 128008 ('<|eom_id|>')
+Sep 02 04:47:43 jetson1 ollama[185012]: load:   - 128009 ('<|eot_id|>')
+Sep 02 04:47:43 jetson1 ollama[185012]: load: special tokens cache size = 256
+Sep 02 04:47:43 jetson1 ollama[185012]: load: token to piece cache size = 0.7999 MB
+Sep 02 04:47:43 jetson1 ollama[185012]: print_info: arch             = llama
+Sep 02 04:47:43 jetson1 ollama[185012]: print_info: vocab_only       = 1
+Sep 02 04:47:43 jetson1 ollama[185012]: print_info: model type       = ?B
+Sep 02 04:47:43 jetson1 ollama[185012]: print_info: model params     = 1.24 B
+Sep 02 04:47:43 jetson1 ollama[185012]: print_info: general.name     = Llama 3.2 1B Instruct
+Sep 02 04:47:43 jetson1 ollama[185012]: print_info: vocab type       = BPE
+Sep 02 04:47:43 jetson1 ollama[185012]: print_info: n_vocab          = 128256
+Sep 02 04:47:43 jetson1 ollama[185012]: print_info: n_merges         = 280147
+Sep 02 04:47:43 jetson1 ollama[185012]: print_info: BOS token        = 128000 '<|begin_of_text|>'
+Sep 02 04:47:43 jetson1 ollama[185012]: print_info: EOS token        = 128009 '<|eot_id|>'
+Sep 02 04:47:43 jetson1 ollama[185012]: print_info: EOT token        = 128009 '<|eot_id|>'
+Sep 02 04:47:43 jetson1 ollama[185012]: print_info: EOM token        = 128008 '<|eom_id|>'
+Sep 02 04:47:43 jetson1 ollama[185012]: print_info: LF token         = 198 'Ċ'
+Sep 02 04:47:43 jetson1 ollama[185012]: print_info: EOG token        = 128001 '<|end_of_text|>'
+Sep 02 04:47:43 jetson1 ollama[185012]: print_info: EOG token        = 128008 '<|eom_id|>'
+Sep 02 04:47:43 jetson1 ollama[185012]: print_info: EOG token        = 128009 '<|eot_id|>'
+Sep 02 04:47:43 jetson1 ollama[185012]: print_info: max token length = 256
+Sep 02 04:47:43 jetson1 ollama[185012]: llama_model_load: vocab only - skipping tensors
+Sep 02 04:47:43 jetson1 ollama[185012]: time=2025-09-02T04:47:43.421-05:00 level=INFO source=server.go:388 msg="starting runner" cmd="/usr/local/bin/ollama runner --model /usr/share/ollama/.ollama/models/blobs/sha256-84fffd9ce0ecc7e0a36ec7a3c3aa21bb888213f8bf3db9408d5520a26412f06e --port 35827"
+Sep 02 04:47:43 jetson1 ollama[185012]: time=2025-09-02T04:47:43.439-05:00 level=INFO source=runner.go:864 msg="starting go runner"
+Sep 02 04:47:43 jetson1 ollama[185012]: load_backend: loaded CPU backend from /usr/local/lib/ollama/libggml-cpu.so
+Sep 02 04:47:43 jetson1 ollama[185012]: time=2025-09-02T04:47:43.496-05:00 level=INFO source=server.go:493 msg="system memory" total="7.4 GiB" free="6.2 GiB" free_swap="9.7 GiB"
+Sep 02 04:47:43 jetson1 ollama[185012]: time=2025-09-02T04:47:43.497-05:00 level=INFO source=memory.go:36 msg="new model will fit in available VRAM across minimum required GPUs, loading" model=/usr/share/ollama/.ollama/models/blobs/sha256-84fffd9ce0ecc7e0a36ec7a3c3aa21bb888213f8bf3db9408d5520a26412f06e library=cuda parallel=1 required="1.6 GiB" gpus=1
+Sep 02 04:47:43 jetson1 ollama[185012]: time=2025-09-02T04:47:43.497-05:00 level=INFO source=server.go:533 msg=offload library=cuda layers.requested=-1 layers.model=17 layers.offload=17 layers.split=[17] memory.available="[6.0 GiB]" memory.gpu_overhead="0 B" memory.required.full="1.6 GiB" memory.required.partial="1.6 GiB" memory.required.kv="128.0 MiB" memory.required.allocations="[1.6 GiB]" memory.weights.total="762.8 MiB" memory.weights.repeating="557.3 MiB" memory.weights.nonrepeating="205.5 MiB" memory.graph.full="280.0 MiB" memory.graph.partial="464.0 MiB"
+Sep 02 04:47:45 jetson1 ollama[185012]: ggml_cuda_init: GGML_CUDA_FORCE_MMQ:    no
+Sep 02 04:47:45 jetson1 ollama[185012]: ggml_cuda_init: GGML_CUDA_FORCE_CUBLAS: no
+Sep 02 04:47:45 jetson1 ollama[185012]: ggml_cuda_init: found 1 CUDA devices:
+Sep 02 04:47:45 jetson1 ollama[185012]:   Device 0: Orin, compute capability 8.7, VMM: yes, ID: GPU-c94334b5-11ed-533c-90d5-7ece4e17e5ec
+Sep 02 04:47:45 jetson1 ollama[185012]: load_backend: loaded CUDA backend from /usr/local/lib/ollama/cuda_jetpack6/libggml-cuda.so
+Sep 02 04:47:45 jetson1 ollama[185012]: time=2025-09-02T04:47:45.019-05:00 level=INFO source=ggml.go:104 msg=system CPU.0.NEON=1 CPU.0.ARM_FMA=1 CPU.0.LLAMAFILE=1 CPU.1.NEON=1 CPU.1.ARM_FMA=1 CPU.1.LLAMAFILE=1 CUDA.0.ARCHS=870 CUDA.0.USE_GRAPHS=1 CUDA.0.PEER_MAX_BATCH_SIZE=128 compiler=cgo(clang)
+Sep 02 04:47:45 jetson1 ollama[185012]: time=2025-09-02T04:47:45.037-05:00 level=INFO source=runner.go:900 msg="Server listening on 127.0.0.1:35827"
+Sep 02 04:47:45 jetson1 ollama[185012]: time=2025-09-02T04:47:45.040-05:00 level=INFO source=runner.go:799 msg=load request="{Operation:commit LoraPath:[] Parallel:1 BatchSize:512 FlashAttention:false KvSize:4096 KvCacheType: NumThreads:6 GPULayers:17[ID:GPU-c94334b5-11ed-533c-90d5-7ece4e17e5ec Layers:17(0..16)] MultiUserCache:false ProjectorPath: MainGPU:0 UseMmap:true}"
+Sep 02 04:47:45 jetson1 ollama[185012]: time=2025-09-02T04:47:45.040-05:00 level=INFO source=server.go:1236 msg="waiting for llama runner to start responding"
+Sep 02 04:47:45 jetson1 ollama[185012]: time=2025-09-02T04:47:45.041-05:00 level=INFO source=server.go:1270 msg="waiting for server to become available" status="llm server loading model"
+Sep 02 04:47:45 jetson1 ollama[185012]: llama_model_load_from_file_impl: using device CUDA0 (Orin) - 5994 MiB free
+Sep 02 04:47:45 jetson1 ollama[185012]: llama_model_loader: loaded meta data with 30 key-value pairs and 147 tensors from /usr/share/ollama/.ollama/models/blobs/sha256-84fffd9ce0ecc7e0a36ec7a3c3aa21bb888213f8bf3db9408d5520a26412f06e (version GGUF V3 (latest))
+Sep 02 04:47:45 jetson1 ollama[185012]: llama_model_loader: Dumping metadata keys/values. Note: KV overrides do not apply in this output.
+Sep 02 04:47:45 jetson1 ollama[185012]: llama_model_loader: - kv   0:                       general.architecture str              = llama
+Sep 02 04:47:45 jetson1 ollama[185012]: llama_model_loader: - kv   1:                               general.type str              = model
+Sep 02 04:47:45 jetson1 ollama[185012]: llama_model_loader: - kv   2:                               general.name str              = Llama 3.2 1B Instruct
+Sep 02 04:47:45 jetson1 ollama[185012]: llama_model_loader: - kv   3:                           general.finetune str              = Instruct
+Sep 02 04:47:45 jetson1 ollama[185012]: llama_model_loader: - kv   4:                           general.basename str              = Llama-3.2
+Sep 02 04:47:45 jetson1 ollama[185012]: llama_model_loader: - kv   5:                         general.size_label str              = 1B
+Sep 02 04:47:45 jetson1 ollama[185012]: llama_model_loader: - kv   6:                               general.tags arr[str,6]       = ["facebook", "meta", "pytorch", "llam...
+Sep 02 04:47:45 jetson1 ollama[185012]: llama_model_loader: - kv   7:                          general.languages arr[str,8]       = ["en", "de", "fr", "it", "pt", "hi", ...
+Sep 02 04:47:45 jetson1 ollama[185012]: llama_model_loader: - kv   8:                          llama.block_count u32              = 16
+Sep 02 04:47:45 jetson1 ollama[185012]: llama_model_loader: - kv   9:                       llama.context_length u32              = 131072
+Sep 02 04:47:45 jetson1 ollama[185012]: llama_model_loader: - kv  10:                     llama.embedding_length u32              = 2048
+Sep 02 04:47:45 jetson1 ollama[185012]: llama_model_loader: - kv  11:                  llama.feed_forward_length u32              = 8192
+Sep 02 04:47:45 jetson1 ollama[185012]: llama_model_loader: - kv  12:                 llama.attention.head_count u32              = 32
+Sep 02 04:47:45 jetson1 ollama[185012]: llama_model_loader: - kv  13:              llama.attention.head_count_kv u32              = 8
+Sep 02 04:47:45 jetson1 ollama[185012]: llama_model_loader: - kv  14:                       llama.rope.freq_base f32              = 500000.000000
+Sep 02 04:47:45 jetson1 ollama[185012]: llama_model_loader: - kv  15:     llama.attention.layer_norm_rms_epsilon f32              = 0.000010
+Sep 02 04:47:45 jetson1 ollama[185012]: llama_model_loader: - kv  16:                 llama.attention.key_length u32              = 64
+Sep 02 04:47:45 jetson1 ollama[185012]: llama_model_loader: - kv  17:               llama.attention.value_length u32              = 64
+Sep 02 04:47:45 jetson1 ollama[185012]: llama_model_loader: - kv  18:                          general.file_type u32              = 15
+Sep 02 04:47:45 jetson1 ollama[185012]: llama_model_loader: - kv  19:                           llama.vocab_size u32              = 128256
+Sep 02 04:47:45 jetson1 ollama[185012]: llama_model_loader: - kv  20:                 llama.rope.dimension_count u32              = 64
+Sep 02 04:47:45 jetson1 ollama[185012]: llama_model_loader: - kv  21:                       tokenizer.ggml.model str              = gpt2
+Sep 02 04:47:45 jetson1 ollama[185012]: llama_model_loader: - kv  22:                         tokenizer.ggml.pre str              = llama-bpe
+Sep 02 04:47:45 jetson1 ollama[185012]: llama_model_loader: - kv  23:                      tokenizer.ggml.tokens arr[str,128256]  = ["!", "\"", "#", "$", "%", "&", "'", ...
+Sep 02 04:47:45 jetson1 ollama[185012]: llama_model_loader: - kv  24:                  tokenizer.ggml.token_type arr[i32,128256]  = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, ...
+Sep 02 04:47:45 jetson1 ollama[185012]: llama_model_loader: - kv  25:                      tokenizer.ggml.merges arr[str,280147]  = ["Ġ Ġ", "Ġ ĠĠĠ", "ĠĠ ĠĠ", "...
+Sep 02 04:47:45 jetson1 ollama[185012]: llama_model_loader: - kv  26:                tokenizer.ggml.bos_token_id u32              = 128000
+Sep 02 04:47:45 jetson1 ollama[185012]: llama_model_loader: - kv  27:                tokenizer.ggml.eos_token_id u32              = 128009
+Sep 02 04:47:45 jetson1 ollama[185012]: llama_model_loader: - kv  28:                    tokenizer.chat_template str              = {{- bos_token }}\n{%- if custom_tools ...
+Sep 02 04:47:45 jetson1 ollama[185012]: llama_model_loader: - kv  29:               general.quantization_version u32              = 2
+Sep 02 04:47:45 jetson1 ollama[185012]: llama_model_loader: - type  f32:   34 tensors
+Sep 02 04:47:45 jetson1 ollama[185012]: llama_model_loader: - type q4_K:   96 tensors
+Sep 02 04:47:45 jetson1 ollama[185012]: llama_model_loader: - type q6_K:   17 tensors
+Sep 02 04:47:45 jetson1 ollama[185012]: print_info: file format = GGUF V3 (latest)
+Sep 02 04:47:45 jetson1 ollama[185012]: print_info: file type   = Q4_K - Medium
+Sep 02 04:47:45 jetson1 ollama[185012]: print_info: file size   = 762.81 MiB (5.18 BPW)
+Sep 02 04:47:45 jetson1 ollama[185012]: load: printing all EOG tokens:
+Sep 02 04:47:45 jetson1 ollama[185012]: load:   - 128001 ('<|end_of_text|>')
+Sep 02 04:47:45 jetson1 ollama[185012]: load:   - 128008 ('<|eom_id|>')
+Sep 02 04:47:45 jetson1 ollama[185012]: load:   - 128009 ('<|eot_id|>')
+Sep 02 04:47:45 jetson1 ollama[185012]: load: special tokens cache size = 256
+Sep 02 04:47:45 jetson1 ollama[185012]: load: token to piece cache size = 0.7999 MB
+Sep 02 04:47:45 jetson1 ollama[185012]: print_info: arch             = llama
+Sep 02 04:47:45 jetson1 ollama[185012]: print_info: vocab_only       = 0
+Sep 02 04:47:45 jetson1 ollama[185012]: print_info: n_ctx_train      = 131072
+Sep 02 04:47:45 jetson1 ollama[185012]: print_info: n_embd           = 2048
+Sep 02 04:47:45 jetson1 ollama[185012]: print_info: n_layer          = 16
+Sep 02 04:47:45 jetson1 ollama[185012]: print_info: n_head           = 32
+Sep 02 04:47:45 jetson1 ollama[185012]: print_info: n_head_kv        = 8
+Sep 02 04:47:45 jetson1 ollama[185012]: print_info: n_rot            = 64
+Sep 02 04:47:45 jetson1 ollama[185012]: print_info: n_swa            = 0
+Sep 02 04:47:45 jetson1 ollama[185012]: print_info: is_swa_any       = 0
+Sep 02 04:47:45 jetson1 ollama[185012]: print_info: n_embd_head_k    = 64
+Sep 02 04:47:45 jetson1 ollama[185012]: print_info: n_embd_head_v    = 64
+Sep 02 04:47:45 jetson1 ollama[185012]: print_info: n_gqa            = 4
+Sep 02 04:47:45 jetson1 ollama[185012]: print_info: n_embd_k_gqa     = 512
+Sep 02 04:47:45 jetson1 ollama[185012]: print_info: n_embd_v_gqa     = 512
+Sep 02 04:47:45 jetson1 ollama[185012]: print_info: f_norm_eps       = 0.0e+00
+Sep 02 04:47:45 jetson1 ollama[185012]: print_info: f_norm_rms_eps   = 1.0e-05
+Sep 02 04:47:45 jetson1 ollama[185012]: print_info: f_clamp_kqv      = 0.0e+00
+Sep 02 04:47:45 jetson1 ollama[185012]: print_info: f_max_alibi_bias = 0.0e+00
+Sep 02 04:47:45 jetson1 ollama[185012]: print_info: f_logit_scale    = 0.0e+00
+Sep 02 04:47:45 jetson1 ollama[185012]: print_info: f_attn_scale     = 0.0e+00
+Sep 02 04:47:45 jetson1 ollama[185012]: print_info: n_ff             = 8192
+Sep 02 04:47:45 jetson1 ollama[185012]: print_info: n_expert         = 0
+Sep 02 04:47:45 jetson1 ollama[185012]: print_info: n_expert_used    = 0
+Sep 02 04:47:45 jetson1 ollama[185012]: print_info: causal attn      = 1
+Sep 02 04:47:45 jetson1 ollama[185012]: print_info: pooling type     = 0
+Sep 02 04:47:45 jetson1 ollama[185012]: print_info: rope type        = 0
+Sep 02 04:47:45 jetson1 ollama[185012]: print_info: rope scaling     = linear
+Sep 02 04:47:45 jetson1 ollama[185012]: print_info: freq_base_train  = 500000.0
+Sep 02 04:47:45 jetson1 ollama[185012]: print_info: freq_scale_train = 1
+Sep 02 04:47:45 jetson1 ollama[185012]: print_info: n_ctx_orig_yarn  = 131072
+Sep 02 04:47:45 jetson1 ollama[185012]: print_info: rope_finetuned   = unknown
+Sep 02 04:47:45 jetson1 ollama[185012]: print_info: model type       = 1B
+Sep 02 04:47:45 jetson1 ollama[185012]: print_info: model params     = 1.24 B
+Sep 02 04:47:45 jetson1 ollama[185012]: print_info: general.name     = Llama 3.2 1B Instruct
+Sep 02 04:47:45 jetson1 ollama[185012]: print_info: vocab type       = BPE
+Sep 02 04:47:45 jetson1 ollama[185012]: print_info: n_vocab          = 128256
+Sep 02 04:47:45 jetson1 ollama[185012]: print_info: n_merges         = 280147
+Sep 02 04:47:45 jetson1 ollama[185012]: print_info: BOS token        = 128000 '<|begin_of_text|>'
+Sep 02 04:47:45 jetson1 ollama[185012]: print_info: EOS token        = 128009 '<|eot_id|>'
+Sep 02 04:47:45 jetson1 ollama[185012]: print_info: EOT token        = 128009 '<|eot_id|>'
+Sep 02 04:47:45 jetson1 ollama[185012]: print_info: EOM token        = 128008 '<|eom_id|>'
+Sep 02 04:47:45 jetson1 ollama[185012]: print_info: LF token         = 198 'Ċ'
+Sep 02 04:47:45 jetson1 ollama[185012]: print_info: EOG token        = 128001 '<|end_of_text|>'
+Sep 02 04:47:45 jetson1 ollama[185012]: print_info: EOG token        = 128008 '<|eom_id|>'
+Sep 02 04:47:45 jetson1 ollama[185012]: print_info: EOG token        = 128009 '<|eot_id|>'
+Sep 02 04:47:45 jetson1 ollama[185012]: print_info: max token length = 256
+Sep 02 04:47:45 jetson1 ollama[185012]: load_tensors: loading model tensors, this can take a while... (mmap = true)
+Sep 02 04:47:45 jetson1 ollama[185012]: load_tensors: offloading 16 repeating layers to GPU
+Sep 02 04:47:45 jetson1 ollama[185012]: load_tensors: offloading output layer to GPU
+Sep 02 04:47:45 jetson1 ollama[185012]: load_tensors: offloaded 17/17 layers to GPU
+Sep 02 04:47:45 jetson1 ollama[185012]: load_tensors:   CPU_Mapped model buffer size =   205.49 MiB
+Sep 02 04:47:45 jetson1 ollama[185012]: load_tensors:        CUDA0 model buffer size =   762.81 MiB
+Sep 02 04:47:46 jetson1 ollama[185012]: llama_context: constructing llama_context
+Sep 02 04:47:46 jetson1 ollama[185012]: llama_context: n_seq_max     = 1
+Sep 02 04:47:46 jetson1 ollama[185012]: llama_context: n_ctx         = 4096
+Sep 02 04:47:46 jetson1 ollama[185012]: llama_context: n_ctx_per_seq = 4096
+Sep 02 04:47:46 jetson1 ollama[185012]: llama_context: n_batch       = 512
+Sep 02 04:47:46 jetson1 ollama[185012]: llama_context: n_ubatch      = 512
+Sep 02 04:47:46 jetson1 ollama[185012]: llama_context: causal_attn   = 1
+Sep 02 04:47:46 jetson1 ollama[185012]: llama_context: flash_attn    = 0
+Sep 02 04:47:46 jetson1 ollama[185012]: llama_context: kv_unified    = false
+Sep 02 04:47:46 jetson1 ollama[185012]: llama_context: freq_base     = 500000.0
+Sep 02 04:47:46 jetson1 ollama[185012]: llama_context: freq_scale    = 1
+Sep 02 04:47:46 jetson1 ollama[185012]: llama_context: n_ctx_per_seq (4096) < n_ctx_train (131072) -- the full capacity of the model will not be utilized
+Sep 02 04:47:46 jetson1 ollama[185012]: llama_context:  CUDA_Host  output buffer size =     0.50 MiB
+Sep 02 04:47:46 jetson1 ollama[185012]: llama_kv_cache_unified:      CUDA0 KV buffer size =   128.00 MiB
+Sep 02 04:47:46 jetson1 ollama[185012]: llama_kv_cache_unified: size =  128.00 MiB (  4096 cells,  16 layers,  1/1 seqs), K (f16):   64.00 MiB, V (f16):   64.00 MiB
+Sep 02 04:47:46 jetson1 ollama[185012]: llama_context:      CUDA0 compute buffer size =   272.00 MiB
+Sep 02 04:47:46 jetson1 ollama[185012]: llama_context:  CUDA_Host compute buffer size =    14.01 MiB
+Sep 02 04:47:46 jetson1 ollama[185012]: llama_context: graph nodes  = 566
+Sep 02 04:47:46 jetson1 ollama[185012]: llama_context: graph splits = 2
+Sep 02 04:47:46 jetson1 ollama[185012]: time=2025-09-02T04:47:46.295-05:00 level=INFO source=server.go:1274 msg="llama runner started in 2.87 seconds"
+Sep 02 04:47:46 jetson1 ollama[185012]: time=2025-09-02T04:47:46.296-05:00 level=INFO source=sched.go:473 msg="loaded runners" count=1
+Sep 02 04:47:46 jetson1 ollama[185012]: time=2025-09-02T04:47:46.296-05:00 level=INFO source=server.go:1236 msg="waiting for llama runner to start responding"
+Sep 02 04:47:46 jetson1 ollama[185012]: time=2025-09-02T04:47:46.296-05:00 level=INFO source=server.go:1274 msg="llama runner started in 2.88 seconds"
+Sep 02 04:47:47 jetson1 ollama[185012]: [GIN] 2025/09/02 - 04:47:47 | 200 |  4.671168086s |   192.168.0.252 | POST     "/api/generate"
+^C
