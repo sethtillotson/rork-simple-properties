@@ -113,6 +113,32 @@ export async function generateViaGateway(prompt: string, context?: Record<string
   return JSON.stringify(data);
 }
 
+export async function analyzePortfolioViaGateway(
+  properties: any[],
+  transactions: any[],
+  maintenanceRequests: any[]
+): Promise<any> {
+  const { baseUrl, apiToken } = await getConfig();
+  if (!baseUrl) throw new Error('AI gateway is not configured. Please set the Gateway URL in Settings.');
+  const url = `${baseUrl.replace(/\/$/, '')}/ai/analyze-portfolio`;
+  const payload = { properties, transactions, maintenanceRequests };
+  const data = await doFetch<any>('POST', url, payload, apiToken);
+  return data?.analysis || data;
+}
+
+export async function predictMaintenanceViaGateway(
+  property: any,
+  maintenanceHistory: any[],
+  transactions: any[]
+): Promise<any[]> {
+  const { baseUrl, apiToken } = await getConfig();
+  if (!baseUrl) throw new Error('AI gateway is not configured. Please set the Gateway URL in Settings.');
+  const url = `${baseUrl.replace(/\/$/, '')}/ai/predict-maintenance`;
+  const payload = { property, maintenanceHistory, transactions };
+  const data = await doFetch<any>('POST', url, payload, apiToken);
+  return data?.insights || [];
+}
+
 export async function convertHtmlToDocx(html: string, fileName?: string): Promise<{ base64: string; filename: string }> {
   const { baseUrl, apiToken } = await getConfig();
   if (!baseUrl) throw new Error('AI gateway is not configured. Please set the Gateway URL in Settings.');

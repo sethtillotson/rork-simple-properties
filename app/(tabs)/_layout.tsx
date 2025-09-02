@@ -1,6 +1,6 @@
 import { Tabs } from "expo-router";
 import React from "react";
-import { Home, Users, Wrench, DollarSign, Settings as SettingsIcon } from "lucide-react-native";
+import { Home, Users, Wrench, DollarSign, Settings as SettingsIcon, Brain } from "lucide-react-native";
 import { useTheme } from 'react-native-paper';
 
 export default function TabLayout() {
@@ -51,6 +51,13 @@ export default function TabLayout() {
         options={{
           title: "Financials",
           tabBarIcon: ({ color, size }) => <DollarSign color={color} size={size} />,
+        }}
+      />
+      <Tabs.Screen
+        name="advisor"
+        options={{
+          title: "AI Advisor",
+          tabBarIcon: ({ color, size }) => <Brain color={color} size={size} />,
         }}
       />
       <Tabs.Screen

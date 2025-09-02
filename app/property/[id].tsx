@@ -12,12 +12,39 @@ import { useDataService } from '@/hooks/useDataService';
 import type { Utility, Insurance, Tax, Loan, Property, Checklist } from '@/types/property';
 import { documentTemplates, type DocumentTemplate } from '@/utils/documentTemplates';
 import { buildDocVariables } from '@/utils/docVariables';
+import { investmentAdvisor, InvestmentInsight } from '@/services/investmentAdvisorService';
+import { useFinancials } from '@/context/FinancialsContext';
+import { useMaintenance } from '@/context/MaintenanceContext';
 
 export default function PropertyDetailsScreen() {
-  const { id } = useLocalSearchParams<{ id?: string }>();
-  const theme = useTheme();
-  const { getPropertyById, addUtilityToProperty, updateUtilityOnProperty, deleteUtilityFromProperty, addInsuranceToProperty, updateInsuranceOnProperty, deleteInsuranceFromProperty, addTaxToProperty, updateTaxOnProperty, deleteTaxFromProperty, addLoanToProperty, updateLoanOnProperty, deleteLoanFromProperty, addChecklistToProperty, updateChecklistItemStatus, deleteChecklistFromProperty } = useProperties();
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const { 
+    properties, 
+    updateProperty, 
+    deleteProperty,
+    getPropertyById,
+    addUtilityToProperty,
+    updateUtilityOnProperty,
+    deleteUtilityFromProperty,
+    addInsuranceToProperty,
+    updateInsuranceOnProperty,
+    deleteInsuranceFromProperty,
+    addTaxToProperty,
+    updateTaxOnProperty,
+    deleteTaxFromProperty,
+    addLoanToProperty,
+    updateLoanOnProperty,
+    deleteLoanFromProperty,
+    addChecklistToProperty,
+    updateChecklistItemStatus,
+    deleteChecklistFromProperty,
+  } = useProperties();
+  const { transactions } = useFinancials();
+  const { requests: maintenanceRequests } = useMaintenance();
+  const { allTemplates } = useChecklistTemplates();
   const { deletePropertyAndCascade } = useDataService();
+  const theme = useTheme();
+  const insets = useSafeAreaInsets();
 
   const [utilitiesExpanded, setUtilitiesExpanded] = useState<boolean>(true);
   const [utilityModalVisible, setUtilityModalVisible] = useState<boolean>(false);
@@ -65,9 +92,10 @@ export default function PropertyDetailsScreen() {
   const [selectedChecklistId, setSelectedChecklistId] = useState<string | null>(null);
 
   const [docModalVisible, setDocModalVisible] = useState<boolean>(false);
+  const [aiInsightsLoading, setAiInsightsLoading] = useState<boolean>(false);
+  const [maintenanceInsights, setMaintenanceInsights] = useState<InvestmentInsight[]>([]);
 
   const property = useMemo(() => (typeof id === 'string' ? getPropertyById(id) : undefined), [id, getPropertyById]);
-  const { allTemplates } = useChecklistTemplates();
 
   const selectedChecklist = useMemo(() => {
     if (!property) return null;
@@ -199,6 +227,47 @@ export default function PropertyDetailsScreen() {
     );
   }, [property, deletePropertyAndCascade]);
 
+  const generateMaintenanceInsights = useCallback(async () => {
+    if (!property) return;
+
+    setAiInsightsLoading(true);
+    try {
+      const propertyMaintenanceRequests = maintenanceRequests.filter(req => req.propertyId === property.id);
+      const propertyTransactions = transactions.filter(t => t.propertyId === property.id);
+      
+      const insights = await investmentAdvisor.predictMaintenance(
+        property,
+        propertyMaintenanceRequests,
+        propertyTransactions
+      );
+      
+      setMaintenanceInsights(insights);
+      
+      if (insights.length > 0) {
+        Alert.alert(
+          'AI Insights Generated',
+          `Found ${insights.length} predictive maintenance insights for this property.`,
+          [{ text: 'OK' }]
+        );
+      } else {
+        Alert.alert(
+          'No Insights Found',
+          'No specific maintenance predictions available for this property at this time.',
+          [{ text: 'OK' }]
+        );
+      }
+    } catch (error) {
+      console.error('[PropertyDetails] Maintenance insights failed:', error);
+      Alert.alert(
+        'Analysis Failed', 
+        'Could not generate maintenance insights. Please check your gateway connection.',
+        [{ text: 'OK' }]
+      );
+    } finally {
+      setAiInsightsLoading(false);
+    }
+  }, [property, maintenanceRequests, transactions]);
+
   const openAddInsurance = useCallback(() => {
     setEditingInsurance(null);
     setInsProvider('');
@@ -318,8 +387,6 @@ export default function PropertyDetailsScreen() {
     ]);
   }, [property, deleteTaxFromProperty]);
 
-  const insets = useSafeAreaInsets();
-
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }}>
       <Stack.Screen options={{ headerShown: false }} />
@@ -408,7 +475,56 @@ export default function PropertyDetailsScreen() {
                 <Button mode="contained" onPress={() => setDocModalVisible(true)} testID="generateDocBtn" style={styles.flex1}>
                   <Text>Generate Document</Text>
                 </Button>
+                <Button 
+                  mode="outlined" 
+                  onPress={generateMaintenanceInsights}
+                  testID="aiInsightsBtn" 
+                  style={styles.flex1}
+                  loading={aiInsightsLoading}
+                  disabled={aiInsightsLoading}
+                >
+                  <Text>AI Insights</Text>
+                </Button>
               </View>
+
+              {maintenanceInsights.length > 0 && (
+                <List.Section>
+                  <List.Accordion
+                    title={`AI Maintenance Insights (${maintenanceInsights.length})`}
+                    expanded={true}
+                    id="ai-insights-accordion"
+                  >
+                    {maintenanceInsights.map((insight) => (
+                      <List.Item
+                        key={insight.id}
+                        title={insight.title}
+                        description={insight.description}
+                        left={() => (
+                          <Chip 
+                            mode="outlined" 
+                            compact 
+                            style={{ 
+                              borderColor: insight.priority === 'high' ? theme.colors.error : 
+                                          insight.priority === 'medium' ? '#f59e0b' : theme.colors.primary,
+                              marginRight: 8
+                            }}
+                          >
+                            {insight.priority.toUpperCase()}
+                          </Chip>
+                        )}
+                        right={() => (
+                          <Text variant="bodySmall" style={{ opacity: 0.7 }}>
+                            {insight.estimatedImpact?.financial ? 
+                              `$${Math.abs(insight.estimatedImpact.financial)}` : 
+                              `${Math.round(insight.confidence * 100)}% confidence`
+                            }
+                          </Text>
+                        )}
+                      />
+                    ))}
+                  </List.Accordion>
+                </List.Section>
+              )}
 
               <List.Section>
                 <List.Accordion

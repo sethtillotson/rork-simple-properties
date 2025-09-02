@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import createContextHook from '@nkzw/create-context-hook';
 import { Alert } from 'react-native';
-import { defaultDocumentTemplates } from '@/utils/documentTemplates';
+import { documentTemplates } from '@/utils/documentTemplates';
 
 export interface DocumentTemplate {
   id: string;
@@ -36,7 +36,7 @@ export const [DocumentTemplatesProvider, useDocumentTemplates] = createContextHo
 
   const mapDefaultToDocs = useCallback((): DocumentTemplate[] => {
     const base = new Date(0).toISOString();
-    return defaultDocumentTemplates.map((t, idx) => ({
+    return documentTemplates.map((t: any, idx: number) => ({
       id: `default-${idx}-${t.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}`,
       name: t.name,
       content: t.content,
