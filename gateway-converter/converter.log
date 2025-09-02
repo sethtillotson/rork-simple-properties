@@ -1,0 +1,8 @@
+nohup: ignoring input
+[converter] listening on 8084
+[converter] Pandoc version: pandoc 2.9.2.1
+[converter] POST /convert/docx received
+[converter] HTML written to /mnt/storage/simple-properties/rork-simple-properties/gateway-converter/temp/input-1756824702218.html
+[converter] Running: pandoc "/mnt/storage/simple-properties/rork-simple-properties/gateway-converter/temp/input-1756824702218.html" -o "/mnt/storage/simple-properties/rork-simple-properties/gateway-converter/temp/output-1756824702218.docx" --from html --to docx
+[converter] Pandoc conversion completed
+[converter] Conversion successful, file size: 9822 bytes

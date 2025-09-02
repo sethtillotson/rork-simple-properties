@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: gateway
-          image: ttl.sh/rork-gateway-1756796153:24h
+          image: ttl.sh/rork-gateway-1756825003:24h
           imagePullPolicy: Always
           ports:
             - containerPort: 8082
@@ -31,6 +31,8 @@ spec:
               value: "llama3.2:1b-instruct-q4_K_M"
             - name: DEMO_MODE
               value: "false"
+            - name: CONVERTER_URL
+              value: "http://127.0.0.1:8084"
       nodeSelector:
         kubernetes.io/hostname: master
       tolerations:

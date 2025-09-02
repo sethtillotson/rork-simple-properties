@@ -29,7 +29,7 @@ export async function setConfig(cfg: GatewayConfig): Promise<void> {
   await Promise.all(ops);
 }
 
-function withTimeout<T>(p: Promise<T>, ms = 20000): Promise<T> {
+function withTimeout<T>(p: Promise<T>, ms = 150000): Promise<T> {
   return new Promise<T>((resolve, reject) => {
     const id = setTimeout(() => reject(new Error(`Request timed out after ${ms}ms`)), ms);
     p.then((v) => { clearTimeout(id); resolve(v); }, (e) => { clearTimeout(id); reject(e); });
@@ -95,7 +95,7 @@ export async function pingGateway(): Promise<{ ok: boolean; detail?: string }> {
 export async function generateViaGateway(prompt: string, context?: Record<string, unknown>): Promise<string> {
   const { baseUrl, apiToken } = await getConfig();
   if (!baseUrl) throw new Error('AI gateway is not configured. Please set the Gateway URL in Settings.');
-  const url = `${baseUrl.replace(/\/$/, '')}/ai/generate`;
+  const url = `${baseUrl.replace(/\/$/, '')}/api/generate`;
   const payload = { prompt, context };
   const data = await doFetch<any>('POST', url, payload, apiToken);
   // Allow HTML responses now for document rendering; only block known misroutes like Adminer.
@@ -120,7 +120,7 @@ export async function analyzePortfolioViaGateway(
 ): Promise<any> {
   const { baseUrl, apiToken } = await getConfig();
   if (!baseUrl) throw new Error('AI gateway is not configured. Please set the Gateway URL in Settings.');
-  const url = `${baseUrl.replace(/\/$/, '')}/ai/analyze-portfolio`;
+  const url = `${baseUrl.replace(/\/$/, '')}/api/analyze-portfolio`;
   const payload = { properties, transactions, maintenanceRequests };
   const data = await doFetch<any>('POST', url, payload, apiToken);
   return data?.analysis || data;
@@ -133,7 +133,7 @@ export async function predictMaintenanceViaGateway(
 ): Promise<any[]> {
   const { baseUrl, apiToken } = await getConfig();
   if (!baseUrl) throw new Error('AI gateway is not configured. Please set the Gateway URL in Settings.');
-  const url = `${baseUrl.replace(/\/$/, '')}/ai/predict-maintenance`;
+  const url = `${baseUrl.replace(/\/$/, '')}/api/predict-maintenance`;
   const payload = { property, maintenanceHistory, transactions };
   const data = await doFetch<any>('POST', url, payload, apiToken);
   return data?.insights || [];

@@ -7,12 +7,14 @@ import { useFinancials } from '@/context/FinancialsContext';
 import { useMaintenance } from '@/context/MaintenanceContext';
 import { investmentAdvisor, InvestmentInsight, PortfolioAnalysis } from '@/services/investmentAdvisorService';
 import EmptyState from '@/components/EmptyState';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function InvestmentAdvisorScreen() {
   const theme = useTheme();
   const { properties } = useProperties();
   const { transactions } = useFinancials();
   const { requests: maintenanceRequests } = useMaintenance();
+  const insets = useSafeAreaInsets();
   
   const [analysis, setAnalysis] = useState<PortfolioAnalysis | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -80,8 +82,8 @@ export default function InvestmentAdvisorScreen() {
   }
 
   return (
-    <View style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false}>
+    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 96 + insets.bottom }}>
         <Surface style={styles.headerSurface} elevation={0}>
           <View style={styles.headerContent}>
             <Brain size={24} color={theme.colors.primary} />
@@ -260,7 +262,7 @@ export default function InvestmentAdvisorScreen() {
       <FAB
         icon="brain"
         label="Analyze Portfolio"
-        style={styles.fab}
+        style={[styles.fab, { bottom: 16 + insets.bottom }]}
         onPress={analyzePortfolio}
         loading={loading}
         disabled={loading || properties.length === 0}
@@ -332,7 +334,7 @@ export default function InvestmentAdvisorScreen() {
           )}
         </Modal>
       </Portal>
-    </View>
+  </SafeAreaView>
   );
 }
 
