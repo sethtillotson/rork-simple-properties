@@ -22,6 +22,7 @@ export default function DocumentViewerScreen() {
   const [snack, setSnack] = useState<{ visible: boolean; text: string }>({ visible: false, text: '' });
   const insets = useSafeAreaInsets();
   const [menuVisible, setMenuVisible] = useState<boolean>(false);
+  const [rawMode, setRawMode] = useState<boolean>(false);
   const PLACEHOLDER = 'AI response will appear here.';
 
   const isHtml = useMemo(() => {
