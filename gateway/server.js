@@ -166,69 +166,210 @@ app.post(['/api/analyze-portfolio', '/api/analyzePortfolio'], async (req, res) =
       return res.json({ analysis: demoAnalysis });
     }
 
-    // Build comprehensive analysis prompt
+    // Build comprehensive analysis prompt with enhanced context
+    // Build comprehensive analysis prompt with enhanced market context
     const totalRevenue = transactions?.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0) || 0;
     const totalExpenses = transactions?.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0) || 0;
+    const netIncome = totalRevenue - totalExpenses;
     
-    const analysisPrompt = `
-You are an expert real estate investment advisor. Analyze this property portfolio and provide actionable insights in JSON format.
+    // Calculate advanced portfolio metrics
+    const totalValue = properties.reduce((sum, p) => sum + (p.purchasePrice || 0), 0);
+    const totalDebt = properties.reduce((sum, p) => 
+      sum + (p.loans || []).reduce((loanSum, loan) => loanSum + (loan.principalAmount || 0), 0), 0
+    );
+    const totalEquity = totalValue - totalDebt;
+    const leverageRatio = totalValue > 0 ? (totalDebt / totalValue * 100).toFixed(1) : '0';
+    const portfolioCapRate = totalValue > 0 ? ((netIncome / totalValue) * 100).toFixed(2) : '0';
+    
+    // Geographic and diversification analysis
+    const cities = Array.from(new Set(properties.map(p => `${p.city}, ${p.province}`)));
+    const geographicDiversification = cities.length / Math.max(properties.length, 1);
+    const avgRent = properties.reduce((sum, p) => sum + (p.monthlyRent || 0), 0) / Math.max(properties.length, 1);
+    const avgPurchasePrice = properties.reduce((sum, p) => sum + (p.purchasePrice || 0), 0) / Math.max(properties.length, 1);
+    const vacantCount = properties.filter(p => !p.isOccupied).length;
+    const occupancyRate = ((properties.length - vacantCount) / Math.max(properties.length, 1) * 100).toFixed(1);
+    
+    // Market positioning analysis
+    const marketRentPerSqFt = 0.75; // Simulated market average
+    const actualRentPerSqFt = properties.reduce((sum, p) => 
+      sum + ((p.monthlyRent || 0) / Math.max(p.squareFeet || 1000, 1)), 0
+    ) / Math.max(properties.length, 1);
+    const rentVsMarket = ((actualRentPerSqFt / marketRentPerSqFt - 1) * 100).toFixed(1);
+    
+    // Maintenance and operational analysis
+    const highPriorityMaintenance = maintenanceRequests?.filter(req => 
+      req.priority === 'high' && req.status !== 'completed'
+    ).length || 0;
+    const recentMaintenanceExpenses = transactions?.filter(t => 
+      t.type === 'expense' && 
+      new Date(t.date) > new Date(Date.now() - 90 * 24 * 60 * 60 * 1000) &&
+      (t.description.toLowerCase().includes('maintenance') || 
+       t.description.toLowerCase().includes('repair') ||
+       t.description.toLowerCase().includes('hvac') ||
+       t.description.toLowerCase().includes('plumbing'))
+    ).reduce((sum, t) => sum + t.amount, 0) || 0;
 
-PORTFOLIO DATA:
-Properties: ${properties.length}
-Total Revenue (YTD): $${totalRevenue}
-Total Expenses (YTD): $${totalExpenses}
-Net Income: $${totalRevenue - totalExpenses}
+    // Cash flow volatility analysis
+    const monthlyTransactions = transactions?.reduce((acc, t) => {
+      const month = t.date.substring(0, 7); // YYYY-MM
+      if (!acc[month]) acc[month] = { income: 0, expenses: 0 };
+      if (t.type === 'income') acc[month].income += t.amount;
+      else acc[month].expenses += t.amount;
+      return acc;
+    }, {}) || {};
+    
+    const monthlyCashFlows = Object.values(monthlyTransactions).map(m => m.income - m.expenses);
+    const avgMonthlyCashFlow = monthlyCashFlows.reduce((a, b) => a + b, 0) / Math.max(monthlyCashFlows.length, 1);
+    const cashFlowVariance = monthlyCashFlows.reduce((sum, cf) => 
+      sum + Math.pow(cf - avgMonthlyCashFlow, 2), 0
+    ) / Math.max(monthlyCashFlows.length, 1);
+    const cashFlowStdDev = Math.sqrt(cashFlowVariance);
+    const cashFlowVolatility = avgMonthlyCashFlow !== 0 ? (cashFlowStdDev / Math.abs(avgMonthlyCashFlow)) : 0;
 
-PROPERTIES DETAIL:
-${properties.map(p => `
-- ${p.address}: $${p.monthlyRent || 0}/month, ${p.bedrooms}BR/${p.bathrooms}BA
-  Purchase: $${p.purchasePrice || 'N/A'}, Cash Invested: $${p.cashInvested || 'N/A'}
-  Occupied: ${p.isOccupied ? 'Yes' : 'No'}
-  Loans: ${(p.loans || []).length} totaling $${(p.loans || []).reduce((sum, l) => sum + (l.monthlyPayment * 12), 0)}/year
-`).join('')}
+    const analysisPrompt = `You are a sophisticated real estate investment advisor and portfolio analyst with expertise in market analysis, financial modeling, and strategic planning. Analyze this property portfolio comprehensively and provide actionable insights.
 
-RECENT TRANSACTIONS:
-${(transactions || []).slice(0, 15).map(t => 
-  `${t.date}: ${t.type === 'income' ? '+' : '-'}$${t.amount} - ${t.description}`
-).join('\n')}
+EXECUTIVE PORTFOLIO SUMMARY:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📊 PORTFOLIO METRICS:
+• Total Properties: ${properties.length}
+• Geographic Markets: ${cities.join(', ')} (Diversification Score: ${geographicDiversification.toFixed(2)})
+• Portfolio Value: $${totalValue.toLocaleString()}
+• Total Equity: $${totalEquity.toLocaleString()}
+• Leverage Ratio: ${leverageRatio}%
+• Portfolio Cap Rate: ${portfolioCapRate}%
+• Occupancy Rate: ${occupancyRate}%
 
-MAINTENANCE ISSUES:
-${(maintenanceRequests || []).slice(0, 10).map(req => 
-  `${req.createdAt}: ${req.title} (${req.priority}) - ${req.status}`
-).join('\n')}
+💰 FINANCIAL PERFORMANCE (YTD):
+• Gross Revenue: $${totalRevenue.toLocaleString()}
+• Operating Expenses: $${totalExpenses.toLocaleString()}
+• Net Operating Income: $${netIncome.toLocaleString()}
+• Monthly Cash Flow: $${(netIncome / 12).toFixed(0)}
+• Cash Flow Volatility: ${(cashFlowVolatility * 100).toFixed(1)}% (${cashFlowVolatility < 0.15 ? 'Stable' : cashFlowVolatility < 0.3 ? 'Moderate' : 'High'})
 
-Provide response in this exact JSON format:
+🏘️ MARKET POSITIONING:
+• Avg Rent/SqFt: $${actualRentPerSqFt.toFixed(2)} (${rentVsMarket > 0 ? '+' : ''}${rentVsMarket}% vs market)
+• Average Property Value: $${avgPurchasePrice.toFixed(0)}
+• Average Monthly Rent: $${avgRent.toFixed(0)}
+
+⚠️ OPERATIONAL ALERTS:
+• High Priority Maintenance: ${highPriorityMaintenance} properties
+• Recent Maintenance Costs (90d): $${recentMaintenanceExpenses.toFixed(0)}
+• Vacant Units: ${vacantCount}
+
+DETAILED PROPERTY ANALYSIS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+${properties.map((p, i) => {
+  const annualRent = (p.monthlyRent || 0) * 12;
+  const capRate = p.purchasePrice > 0 ? (annualRent / p.purchasePrice * 100).toFixed(2) : '0';
+  const loans = p.loans || [];
+  const totalMonthlyPayments = loans.reduce((sum, loan) => sum + (loan.monthlyPayment || 0), 0);
+  const cashFlow = (p.monthlyRent || 0) - totalMonthlyPayments;
+  const rentPerSqFt = (p.squareFeet > 0) ? ((p.monthlyRent || 0) / p.squareFeet).toFixed(2) : '0';
+  const leverageLevel = p.purchasePrice > 0 ? ((loans.reduce((sum, l) => sum + (l.principalAmount || 0), 0) / p.purchasePrice) * 100).toFixed(1) : '0';
+  
+  return `🏠 PROPERTY ${i + 1}: ${p.address}, ${p.city}, ${p.province}
+  • Configuration: ${p.bedrooms}BR/${p.bathrooms}BA, ${p.squareFeet || 'N/A'} sq ft
+  • Financial: Purchase $${p.purchasePrice?.toLocaleString() || 'N/A'}, Rent $${p.monthlyRent || 0}/mo
+  • Performance: ${capRate}% Cap Rate, $${cashFlow.toFixed(0)} Monthly Cash Flow
+  • Market: $${rentPerSqFt}/sq ft rent, ${leverageLevel}% leveraged
+  • Status: ${p.isOccupied ? '✅ Occupied' : '🔴 VACANT'}
+  • Financing: ${loans.length} loans, $${totalMonthlyPayments.toFixed(0)}/mo payments
+  • Investment: $${p.cashInvested?.toLocaleString() || 'N/A'} cash invested`;
+}).join('\n\n')}
+
+MARKET INTELLIGENCE & CONTEXT:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🌍 REGIONAL MARKET CONDITIONS:
+• North Dakota rental market: Stable growth, energy sector influence
+• Average regional rent/sqft: $0.68-$0.78
+• Typical vacancy rates: 6-12% (seasonal variation)
+• Interest rate environment: 6.5-7.2% for investment properties
+• Property appreciation: 3-5% annually in target markets
+• Population trends: Steady growth in Fargo-Moorhead metro
+
+📈 ECONOMIC INDICATORS:
+• Employment growth: Technology, healthcare, agriculture sectors
+• Median household income growth: 2-3% annually
+• New construction pipeline: Limited supply in key markets
+• Rental demand drivers: Young professionals, university students
+
+RECENT TRANSACTION ANALYSIS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+${(transactions || []).slice(0, 15).map(t => {
+  const propertyRef = t.propertyId ? ` [Property ${properties.findIndex(p => p.id === t.propertyId) + 1}]` : '';
+  return `${t.date}: ${t.type === 'income' ? '💰' : '💸'} $${t.amount.toLocaleString()} - ${t.description}${propertyRef}`;
+}).join('\n')}
+
+MAINTENANCE & OPERATIONS STATUS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+${(maintenanceRequests || []).slice(0, 10).map(req => {
+  const propertyIndex = properties.findIndex(p => p.id === req.propertyId);
+  const priorityIcon = req.priority === 'high' ? '🔥' : req.priority === 'medium' ? '⚡' : '🔧';
+  return `${priorityIcon} ${req.title} [Property ${propertyIndex + 1}] - ${req.status.toUpperCase()}`;
+}).join('\n')}
+
+ANALYSIS REQUIREMENTS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Generate a comprehensive JSON analysis with the following structure. Use the specific data above to provide actionable, data-driven insights:
+
 {
-  "totalValue": number,
-  "totalCashFlow": number,
-  "averageROI": number,
-  "riskScore": number,
+  "totalValue": ${totalValue},
+  "totalCashFlow": ${(netIncome / 12).toFixed(0)},
+  "averageROI": ${portfolioCapRate},
+  "riskScore": [Calculate 0.0-1.0 based on: cash flow volatility (${cashFlowVolatility.toFixed(3)}), vacancy rate (${(vacantCount/properties.length).toFixed(3)}), leverage (${(parseFloat(leverageRatio)/100).toFixed(2)}), geographic concentration (${(1-geographicDiversification).toFixed(2)}), maintenance issues (${(highPriorityMaintenance/properties.length).toFixed(2)})],
   "insights": [
+    // Generate 5-7 specific insights covering:
+    // 1. CASH FLOW OPTIMIZATION (rent increases, expense reduction, vacancy management)
+    // 2. PORTFOLIO RISK MANAGEMENT (diversification, leverage, maintenance)
+    // 3. MARKET OPPORTUNITIES (undervalued properties, expansion markets)
+    // 4. OPERATIONAL EFFICIENCY (property management, maintenance strategies)
+    // 5. FINANCING STRATEGIES (refinancing, debt restructuring, capital allocation)
+    // 6. ACQUISITION TARGETS (market expansion, property types)
+    // 7. DISPOSITION RECOMMENDATIONS (underperforming assets, market timing)
+    
     {
-      "id": "string",
-      "type": "cash_flow|maintenance|tenant|market|risk",
-      "title": "string",
-      "description": "string",
-      "priority": "low|medium|high",
-      "actionItems": ["string"],
+      "id": "insight-[category]-[number]",
+      "type": "cash_flow|maintenance|market|risk|financing|acquisition|disposition",
+      "title": "Specific, actionable insight title with numbers",
+      "description": "Detailed 2-3 sentence analysis referencing specific properties, percentages, and dollar amounts from the data above",
+      "priority": "low|medium|high|critical",
+      "actionItems": [
+        "Specific action with timeline and expected outcome",
+        "Another specific action with measurable goal"
+      ],
       "estimatedImpact": {
-        "financial": number,
-        "timeframe": "string"
+        "financial": [Positive or negative dollar amount based on realistic calculations],
+        "timeframe": "Specific timeline (1-3 months, 6-12 months, etc.)"
       },
-      "confidence": number,
-      "createdAt": "ISO_DATE"
+      "confidence": [0.65-0.95 based on data quality and market certainty],
+      "createdAt": "${new Date().toISOString()}"
     }
   ],
   "recommendations": {
-    "buy": ["string"],
-    "sell": ["string"],
-    "improve": ["string"]
+    "buy": [
+      "Specific acquisition recommendations with target markets, property types, and financial justification",
+      "Market expansion opportunities with ROI projections"
+    ],
+    "sell": [
+      "Specific properties to consider divesting with clear rationale",
+      "Market timing and valuation considerations"
+    ],
+    "improve": [
+      "Specific improvement recommendations with cost estimates and ROI projections",
+      "Operational efficiency enhancements with measurable benefits"
+    ]
   }
 }
 
-Focus on actionable, data-driven insights with specific financial impacts and timelines.`;
-
-    try {
+CRITICAL REQUIREMENTS:
+- Reference specific properties by their addresses and numbers
+- Use actual financial data and percentages from the analysis above
+- Provide realistic financial impact estimates based on property values and cash flows
+- Include market context and timing considerations
+- Prioritize insights by potential financial impact and implementation difficulty
+- Generate insights that reflect the current portfolio composition and performance
+- Consider both short-term tactics and long-term strategic positioning`;    try {
       const rsp = await fetch(`${OLLAMA_URL}/api/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -337,52 +478,156 @@ app.post(['/api/predict-maintenance', '/api/predictMaintenance'], async (req, re
       return res.json({ insights: demoInsights });
     }
 
-    // Build maintenance prediction prompt
+    // Build enhanced maintenance prediction prompt
     const maintenanceTransactions = (transactions || []).filter(t => 
       t.type === 'expense' && t.propertyId === property.id && 
       (t.description.toLowerCase().includes('repair') || 
        t.description.toLowerCase().includes('maintenance') ||
        t.description.toLowerCase().includes('hvac') ||
-       t.description.toLowerCase().includes('plumbing'))
+       t.description.toLowerCase().includes('plumbing') ||
+       t.description.toLowerCase().includes('electrical') ||
+       t.description.toLowerCase().includes('roof') ||
+       t.description.toLowerCase().includes('flooring') ||
+       t.description.toLowerCase().includes('appliance'))
     );
 
-    const maintenancePredictionPrompt = `
-Analyze maintenance patterns for this property and predict future needs. Return a JSON array of maintenance insights.
+    const propertyAge = property.purchaseDate ? 
+      Math.floor((Date.now() - new Date(property.purchaseDate).getTime()) / (365.25 * 24 * 60 * 60 * 1000)) : 
+      'Unknown';
+    
+    const totalMaintenanceCost = maintenanceTransactions.reduce((sum, t) => sum + t.amount, 0);
+    const avgMaintenancePerMonth = maintenanceTransactions.length > 0 ? 
+      totalMaintenanceCost / Math.max(maintenanceTransactions.length, 1) : 0;
 
-Property: ${property.address}
-Type: ${property.bedrooms || 'N/A'}BR/${property.bathrooms || 'N/A'}BA, ${property.squareFeet || 'N/A'} sq ft
+    const maintenancePredictionPrompt = `You are a senior property maintenance strategist and building systems expert with 20+ years of experience in predictive maintenance, regional climate adaptation, and cost-effective property preservation strategies. Your analysis directly impacts investment returns and tenant satisfaction.
 
-Recent Maintenance History:
-${(maintenanceHistory || []).slice(0, 10).map(req => 
-  `- ${req.createdAt}: ${req.title} (${req.priority} priority) - ${req.description}`
+EXECUTIVE BRIEF - MAINTENANCE INTELLIGENCE ANALYSIS
+=================================================
+
+PROPERTY PROFILE:
+Address: ${property.address}, ${property.city}, ${property.province}
+Classification: ${property.bedrooms || 'N/A'}BR/${property.bathrooms || 'N/A'}BA ${property.squareFeet || 'N/A'} sqft
+Construction Year: ${property.yearBuilt || 'N/A'} (${propertyAge} years operational)
+Asset Value: $${property.marketValue?.toLocaleString() || 'N/A'}
+Revenue Stream: $${property.monthlyRent || 0}/month
+Operational Status: ${property.isOccupied ? 'Occupied - Active Revenue' : 'Vacant - Maintenance Window Available'}
+
+MAINTENANCE INTELLIGENCE ASSESSMENT:
+Financial History: $${totalMaintenanceCost.toFixed(0)} total | $${avgMaintenancePerMonth.toFixed(0)} avg/incident | ${maintenanceTransactions.length} incidents
+Performance Baseline: ${maintenanceTransactions.length > 0 ? 
+  (totalMaintenanceCost / (property.squareFeet || 1000) * 1000).toFixed(2) + ' per 1000 sqft' : 'No maintenance history'
+}
+
+RECENT MAINTENANCE EVENTS:
+${maintenanceTransactions.slice(0, 10).map(t => 
+  `• ${t.date}: $${t.amount} - ${t.description}`
 ).join('\n')}
 
-Maintenance Expenses (Recent):
-${maintenanceTransactions.slice(0, 15).map(t => 
-  `- ${t.date}: $${t.amount} - ${t.description}`
+ACTIVE MAINTENANCE QUEUE:
+${(maintenanceHistory || []).slice(0, 8).map(req => 
+  `• ${req.createdAt}: ${req.title} [${req.priority}] - ${req.status}`
 ).join('\n')}
 
-Based on property age, past maintenance patterns, and typical system lifecycles, predict upcoming maintenance needs.
+COMPREHENSIVE SYSTEMS ANALYSIS FRAMEWORK:
 
-Respond with JSON array in this format:
+1. BUILDING LIFECYCLE POSITIONING
+   Assessment Methodology:
+   - Component age vs. expected service life curves
+   - Regional performance degradation patterns
+   - Predictive failure modeling based on usage and climate
+   - Cost-benefit analysis for preventive vs. reactive maintenance
+
+2. CRITICAL SYSTEMS MATRIX
+   
+   A. HVAC INFRASTRUCTURE (Service Life: 15-25 years)
+   - Current system age vs. efficiency degradation
+   - North Dakota winter stress factors (6+ month heating season)
+   - Energy consumption trends indicating wear
+   - Ductwork integrity and seasonal performance
+   - Filter replacement and coil maintenance optimization
+   
+   B. PLUMBING SYSTEMS (Service Life: 20-50 years)
+   - Pipe material assessment (copper/PVC/galvanized lifecycle)
+   - Freeze protection critical in -40°F winters
+   - Water heater efficiency and replacement indicators (8-12 year cycle)
+   - Fixture condition and water pressure monitoring
+   - Seasonal vulnerability assessment
+   
+   C. ELECTRICAL INFRASTRUCTURE (Service Life: 25-40 years)
+   - Panel capacity vs. modern electrical loads
+   - Code compliance and safety inspection timing
+   - GFCI/AFCI protection adequacy
+   - Wiring condition assessment by building age
+   - Energy efficiency upgrade opportunities
+   
+   D. BUILDING ENVELOPE (Service Life: Variable)
+   - Roofing condition (20-30 years asphalt, climate stress)
+   - Window/door sealing efficiency (10-20 years)
+   - Insulation effectiveness (energy loss indicators)
+   - Foundation and weather barrier integrity
+   - Ice dam prevention and snow load management
+
+3. NORTH DAKOTA CLIMATE IMPACT ANALYSIS
+   Environmental Stressors:
+   - Extreme temperature range: -40°F to 100°F
+   - Heating degree days: 8,000+ annually (vs. 5,000 national avg)
+   - Freeze-thaw cycles: 40-60 per year
+   - Snow load: 40+ lbs/sqft design requirement
+   - Humidity swings affecting wood and seals
+   - UV exposure during long summer days
+
+4. PREDICTIVE COST-BENEFIT MODELING
+   Financial Framework:
+   - Emergency repair premium: 2-4x preventive cost
+   - Seasonal labor cost variations (winter +30-50%)
+   - Energy efficiency ROI calculations
+   - Tenant retention impact of proactive maintenance
+   - Property value preservation through system updates
+
+GENERATE STRATEGIC MAINTENANCE PREDICTIONS:
+
+Provide JSON array with 3-5 specific, data-driven maintenance predictions prioritizing:
+- Safety and habitability preservation
+- Cost-effective preventive interventions  
+- Seasonal optimization windows
+- Asset value protection strategies
+- Revenue continuity assurance
+
+Required JSON Format:
 [
   {
-    "id": "unique-id",
+    "id": "pred-[system]-${new Date().toISOString().slice(0,10).replace(/-/g,'')}-[sequence]",
     "type": "maintenance",
-    "title": "Specific maintenance prediction",
-    "description": "Detailed explanation with reasoning",
-    "priority": "low|medium|high",
-    "actionItems": ["specific action 1", "specific action 2"],
+    "title": "System-Specific Predictive Maintenance Alert",
+    "description": "Comprehensive analysis including risk factors, failure probability, cost implications, recommended actions, and strategic timing rationale",
+    "priority": "low|medium|high|critical",
+    "systemCategory": "hvac|plumbing|electrical|envelope|structural|appliances",
+    "actionItems": [
+      "Primary technical intervention with specific timeline and cost range",
+      "Secondary preventive measure with ROI justification",
+      "Ongoing monitoring requirement with inspection frequency"
+    ],
     "estimatedImpact": {
-      "financial": estimated_cost_number,
-      "timeframe": "time period"
+      "preventiveCost": "$X-Y range for recommended preventive actions",
+      "emergencyRisk": "$Z potential cost if failure occurs",
+      "netSavings": "$A-B expected savings from preventive approach",
+      "timeframe": "Optimal execution window with seasonal considerations",
+      "riskReduction": "X% reduction in system failure probability"
     },
-    "confidence": 0.0-1.0,
+    "confidence": "0.70-0.95 based on data quality, system age, maintenance patterns",
+    "urgency": "immediate|short-term|seasonal|long-term",
+    "seasonalOptimal": "Best execution season for cost/weather effectiveness",
     "createdAt": "${new Date().toISOString()}"
   }
 ]
 
-Focus on predictive insights based on maintenance cycles, property age, and past issues.`;
+ANALYSIS REQUIREMENTS:
+- Base predictions on ${propertyAge}-year building lifecycle and documented maintenance patterns
+- Incorporate North Dakota climate stressors and 6-month winter heating season
+- Prioritize high-ROI preventive interventions over emergency repairs
+- Include region-specific cost estimates and seasonal labor considerations
+- Consider ${property.isOccupied ? 'tenant impact and scheduling coordination' : 'vacancy window for intensive maintenance'}
+- Focus on actionable insights protecting $${property.monthlyRent || 0}/month revenue stream`;
 
     try {
       const rsp = await fetch(`${OLLAMA_URL}/api/generate`, {

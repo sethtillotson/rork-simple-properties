@@ -1,5 +1,7 @@
 import { generateViaGateway, analyzePortfolioViaGateway, predictMaintenanceViaGateway } from '@/services/gatewayClient';
 import { Property, MaintenanceRequest } from '@/types/property';
+import { MarketDataService } from '@/services/marketDataService';
+import { EnhancedPortfolioAnalyzer } from '@/services/enhancedPortfolioAnalyzer';
 
 export interface Transaction {
   id: string;
@@ -50,11 +52,62 @@ export class InvestmentAdvisorService {
   ): Promise<PortfolioAnalysis> {
     
     try {
-      const analysis = await analyzePortfolioViaGateway(properties, transactions, maintenanceRequests);
-      return this.validateAndNormalizeAnalysis(analysis);
+      // Get AI-powered analysis from gateway (this is the main analysis)
+      const gatewayAnalysis = await analyzePortfolioViaGateway(properties, transactions, maintenanceRequests);
+      
+      // Enhance with market data insights (for additional context)
+      try {
+        const enhancedInsights = EnhancedPortfolioAnalyzer.analyzePortfolio(
+          properties,
+          transactions,
+          maintenanceRequests
+        );
+        
+        const enhancedRecommendations = EnhancedPortfolioAnalyzer.generateRecommendations(
+          properties,
+          enhancedInsights,
+          transactions
+        );
+        
+        // Add market-based insights to the analysis
+        if (enhancedRecommendations.length > 0) {
+          const marketInsights = enhancedRecommendations.slice(0, 3).map(rec => ({
+            id: rec.id,
+            type: rec.type as 'cash_flow' | 'maintenance' | 'tenant' | 'market' | 'risk',
+            title: rec.title,
+            description: rec.description,
+            priority: rec.priority as 'low' | 'medium' | 'high',
+            actionItems: rec.actionItems,
+            estimatedImpact: {
+              financial: rec.estimatedImpact?.cashFlow || 0,
+              timeframe: rec.timeframe
+            },
+            confidence: rec.confidence,
+            createdAt: new Date().toISOString()
+          }));
+          
+          // Merge market insights with gateway analysis
+          gatewayAnalysis.insights = [
+            ...marketInsights,
+            ...gatewayAnalysis.insights
+          ].slice(0, 10);
+        }
+      } catch (enhanceError) {
+        console.log('[InvestmentAdvisor] Enhanced analytics failed, using gateway only:', enhanceError);
+      }
+      
+      return this.validateAndNormalizeAnalysis(gatewayAnalysis);
     } catch (error) {
-      console.error('[InvestmentAdvisor] Analysis failed:', error);
-      throw new Error('Failed to generate portfolio analysis');
+      console.error('[InvestmentAdvisor] Enhanced analysis failed, falling back to basic:', error);
+      
+      // Fallback to gateway-only analysis
+      try {
+        const analysis = await analyzePortfolioViaGateway(properties, transactions, maintenanceRequests);
+        return this.validateAndNormalizeAnalysis(analysis);
+      } catch (fallbackError) {
+        console.error('[InvestmentAdvisor] All analysis methods failed:', fallbackError);
+        throw new Error('Failed to generate portfolio analysis');
+      }
     }
   }
 
