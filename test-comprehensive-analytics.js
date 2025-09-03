@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-// Use native fetch (available in Node.js >= 18.0.0). For earlier versions, use a polyfill such as 'node-fetch'.
+// This code requires Node.js 18.0.0 or higher for native 'fetch' support. If you are using an earlier Node.js version, install and import a polyfill such as 'node-fetch' (e.g., 'npm install node-fetch') before using 'fetch'.
 
 // Comprehensive test data for enhanced portfolio analytics
 const mockPortfolioData = {
