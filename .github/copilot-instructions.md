@@ -56,7 +56,7 @@ Always reference these instructions first and fallback to search or bash command
 │   └── onDeviceAiService.ts # Local AI processing
 ├── gateway/               # AI gateway service (Node.js)
 │   ├── server.js          # Express server
-│   ├── k8s.yaml          # Kubernetes deployment
+│   ├── k8s.yaml           # Kubernetes deployment
 │   └── package.json       # Gateway dependencies
 ├── types/                 # TypeScript type definitions
 └── utils/                 # Utility functions
