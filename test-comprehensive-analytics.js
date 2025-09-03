@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const fetch = require('node-fetch');
+// Use native fetch instead of node-fetch for Node.js 18+
 
 // Comprehensive test data for enhanced portfolio analytics
 const mockPortfolioData = {
@@ -123,7 +123,7 @@ async function testPortfolioAnalytics() {
   console.log('🔍 Testing Enhanced Portfolio Analytics...\n');
   
   try {
-    const response = await fetch('http://10.43.101.6:8082/api/analyze-portfolio', {
+    const response = await fetch('http://192.168.0.252:8082/api/analyze-portfolio', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(mockPortfolioData)
@@ -233,7 +233,7 @@ async function testMaintenancePrediction() {
   };
   
   try {
-    const response = await fetch('http://10.43.101.6:8082/api/predict-maintenance', {
+    const response = await fetch('http://192.168.0.252:8082/api/predict-maintenance', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(maintenanceData)

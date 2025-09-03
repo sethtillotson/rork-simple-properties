@@ -3,7 +3,7 @@ import cors from 'cors';
 
 const app = express();
 const PORT = process.env.PORT || 8082;
-const OLLAMA_URL = process.env.OLLAMA_URL || 'http://192.168.0.188:11434';
+const OLLAMA_URL = process.env.OLLAMA_URL || 'http://192.168.0.252:11434';
 const DEMO_MODE = String(process.env.DEMO_MODE || 'false').toLowerCase() === 'true';
 
 app.use(cors());
@@ -50,7 +50,7 @@ app.post('/api/generate', async (req, res) => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: process.env.LLM_MODEL || 'llama3.1:8b-instruct-q4_K_M',
+          model: process.env.LLM_MODEL || 'llama3.2:1b-instruct-q4_K_M',
           prompt,
           stream: false,
           options: { temperature: 0.4 },
@@ -84,86 +84,19 @@ app.post(['/api/analyze-portfolio', '/api/analyzePortfolio'], async (req, res) =
     }
 
     if (DEMO_MODE) {
-      // Demo response with realistic data
-      const demoAnalysis = {
-        totalValue: properties.reduce((sum, p) => sum + (p.purchasePrice || 250000), 0),
-        totalCashFlow: properties.reduce((sum, p) => sum + ((p.monthlyRent || 1500) - 800), 0),
-        averageROI: 0.08,
-        riskScore: 0.35,
-        insights: [
-          {
-            id: 'demo-1',
-            type: 'cash_flow',
-            title: 'Optimize Rent Pricing',
-            description: 'Based on your portfolio analysis, 2 properties are priced below market rate. Consider gradual rent increases.',
-            priority: 'medium',
-            actionItems: [
-              'Research comparable properties in your area',
-              'Schedule property improvements to justify rent increase',
-              'Prepare 60-day notice for tenants'
-            ],
-            estimatedImpact: {
-              financial: 2400,
-              timeframe: '3-6 months'
-            },
-            confidence: 0.85,
-            createdAt: new Date().toISOString()
-          },
-          {
-            id: 'demo-2',
-            type: 'maintenance',
-            title: 'Preventive HVAC Maintenance',
-            description: 'Your properties averaging 15+ years old are due for HVAC system checks to avoid costly emergency repairs.',
-            priority: 'high',
-            actionItems: [
-              'Schedule HVAC inspections for all properties',
-              'Budget $800-1200 per property for maintenance',
-              'Consider upgrading to energy-efficient systems for tax benefits'
-            ],
-            estimatedImpact: {
-              financial: -3600,
-              timeframe: '1-2 months'
-            },
-            confidence: 0.92,
-            createdAt: new Date().toISOString()
-          },
-          {
-            id: 'demo-3',
-            type: 'market',
-            title: 'Market Expansion Opportunity',
-            description: 'Current market conditions favor expansion. Your portfolio shows strong performance indicators for scaling.',
-            priority: 'low',
-            actionItems: [
-              'Secure pre-approval for additional financing',
-              'Target properties in similar neighborhoods',
-              'Maintain 6-month operating expense reserve'
-            ],
-            estimatedImpact: {
-              financial: 15000,
-              timeframe: '12-18 months'
-            },
-            confidence: 0.72,
-            createdAt: new Date().toISOString()
-          }
+      // Fallback message instead of mock data
+      const fallbackMessage = {
+        message: "Please enter complete property details for better insights",
+        requiredDetails: [
+          "Property purchase price and current market value",
+          "Monthly rental income and operating expenses", 
+          "Property age, square footage, and location details",
+          "Recent maintenance history and upcoming needs",
+          "Loan information including interest rates and terms"
         ],
-        recommendations: {
-          buy: [
-            'Single-family homes in established neighborhoods with good schools',
-            'Properties with 1% rule potential (monthly rent >= 1% of purchase price)',
-            'Fixer-uppers with 20-30% equity upside after improvements'
-          ],
-          sell: [
-            'Consider divesting properties with consistent negative cash flow',
-            'Evaluate selling properties in declining neighborhoods'
-          ],
-          improve: [
-            'Add in-unit laundry to increase rent by $50-100/month',
-            'Update kitchens and bathrooms for higher tenant retention',
-            'Improve energy efficiency for lower operating costs'
-          ]
-        }
+        note: "AI analytics requires complete property data to provide meaningful investment insights and recommendations."
       };
-      return res.json({ analysis: demoAnalysis });
+      return res.json({ analysis: fallbackMessage });
     }
 
     // Build comprehensive analysis prompt with enhanced context
@@ -374,7 +307,7 @@ CRITICAL REQUIREMENTS:
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: process.env.LLM_MODEL || 'llama3.1:8b-instruct-q4_K_M',
+          model: process.env.LLM_MODEL || 'llama3.2:1b-instruct-q4_K_M',
           prompt: analysisPrompt,
           stream: false,
           options: { temperature: 0.3, top_p: 0.9 },
@@ -406,31 +339,23 @@ CRITICAL REQUIREMENTS:
         console.error('[gateway] JSON parse error:', parseError);
         console.error('[gateway] Raw response:', analysisText);
         
-        // Fallback: return a structured response based on the input
-        const fallbackAnalysis = {
-          totalValue: properties.reduce((sum, p) => sum + (p.purchasePrice || 250000), 0),
-          totalCashFlow: properties.reduce((sum, p) => sum + ((p.monthlyRent || 1500) - 800), 0),
-          averageROI: 0.08,
-          riskScore: 0.35,
-          insights: [{
-            id: 'fallback-1',
-            type: 'cash_flow',
-            title: 'Analysis Generated',
-            description: 'Portfolio analysis completed. Consider reviewing rent pricing and maintenance schedules.',
-            priority: 'medium',
-            actionItems: ['Review rent pricing', 'Schedule property maintenance'],
-            estimatedImpact: { financial: 1000, timeframe: '3-6 months' },
-            confidence: 0.75,
-            createdAt: new Date().toISOString()
-          }],
-          recommendations: {
-            buy: ['Properties with good cash flow potential'],
-            sell: ['Consider divesting underperforming assets'],
-            improve: ['Regular maintenance and upgrades']
-          }
+        // Fallback: return guidance message instead of mock data
+        const fallbackMessage = {
+          message: "Portfolio analysis requires complete property data for accurate insights",
+          requiredDetails: [
+            "Property purchase prices and current market values",
+            "Complete monthly income and expense records",
+            "Property specifications (bedrooms, bathrooms, square footage)",
+            "Maintenance history and upcoming repair needs",
+            "Loan details including principal, interest rates, and payment schedules",
+            "Tenant information and lease terms",
+            "Local market comparable property data"
+          ],
+          note: "Please ensure all properties have comprehensive financial and operational data for meaningful AI-powered investment analysis.",
+          suggestion: "Consider adding missing property details in the Property Management section before requesting portfolio analysis."
         };
         
-        return res.json({ analysis: fallbackAnalysis });
+        return res.json({ analysis: fallbackMessage });
       }
       
     } catch (e) {
@@ -454,28 +379,18 @@ app.post(['/api/predict-maintenance', '/api/predictMaintenance'], async (req, re
     }
 
     if (DEMO_MODE) {
-      const demoInsights = [
-        {
-          id: 'demo-maint-1',
-          type: 'maintenance',
-          title: 'HVAC System Service Due',
-          description: `Based on the age and usage patterns of ${property.address}, the HVAC system is due for preventive maintenance. Regular service can extend system life by 5-7 years.`,
-          priority: 'medium',
-          actionItems: [
-            'Schedule HVAC inspection within 30 days',
-            'Replace air filters (every 3 months)',
-            'Check refrigerant levels and ductwork',
-            'Budget $300-500 for routine maintenance'
-          ],
-          estimatedImpact: {
-            financial: -400,
-            timeframe: '1-2 months'
-          },
-          confidence: 0.78,
-          createdAt: new Date().toISOString()
-        }
-      ];
-      return res.json({ insights: demoInsights });
+      const fallbackMessage = {
+        message: "Property maintenance predictions require detailed property information",
+        requiredDetails: [
+          "Property age, construction year, and building materials",
+          "Complete maintenance history and expense records",
+          "Current condition assessments for major systems (HVAC, plumbing, electrical)",
+          "Property specifications and recent inspection reports",
+          "Warranty information for appliances and systems"
+        ],
+        note: "AI-powered maintenance predictions need comprehensive property data to generate accurate recommendations and cost estimates."
+      };
+      return res.json({ insights: [fallbackMessage] });
     }
 
     // Build enhanced maintenance prediction prompt
@@ -634,7 +549,7 @@ ANALYSIS REQUIREMENTS:
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: process.env.LLM_MODEL || 'llama3.1:8b-instruct-q4_K_M',
+          model: process.env.LLM_MODEL || 'llama3.2:1b-instruct-q4_K_M',
           prompt: maintenancePredictionPrompt,
           stream: false,
           options: { temperature: 0.3, top_p: 0.9 },
@@ -664,20 +579,21 @@ ANALYSIS REQUIREMENTS:
         console.error('[gateway] Maintenance prediction parse error:', parseError);
         console.error('[gateway] Raw response:', responseText);
         
-        // Fallback: return a basic maintenance insight
-        const fallbackInsights = [{
-          id: 'fallback-maint-1',
-          type: 'maintenance',
-          title: 'Routine Maintenance Due',
-          description: `Property at ${property.address} may benefit from routine maintenance checks.`,
-          priority: 'medium',
-          actionItems: ['Schedule HVAC inspection', 'Check plumbing systems', 'Review exterior condition'],
-          estimatedImpact: { financial: -500, timeframe: '1-2 months' },
-          confidence: 0.70,
-          createdAt: new Date().toISOString()
-        }];
+        // Fallback: return guidance message instead of mock data
+        const fallbackMessage = {
+          message: "Maintenance prediction analysis requires complete property data",
+          requiredDetails: [
+            "Property age, construction date, and major renovation history",
+            "Detailed maintenance expense records and service history", 
+            "Current condition of major systems (HVAC, plumbing, electrical, roofing)",
+            "Recent property inspection reports and warranty information",
+            "Appliance ages, brands, and maintenance schedules"
+          ],
+          note: "AI maintenance predictions rely on comprehensive historical data to forecast upcoming repair needs and costs accurately.",
+          suggestion: "Please add detailed maintenance records and property specifications for accurate predictive analysis."
+        };
         
-        return res.json({ insights: fallbackInsights });
+        return res.json({ insights: [fallbackMessage] });
       }
       
     } catch (e) {
