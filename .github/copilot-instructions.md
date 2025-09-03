@@ -103,7 +103,7 @@ Always reference these instructions first and fallback to search or bash command
 
 ### Environment Requirements
 - Node.js 18+ (tested with v20.19.4)
-- npm 10+ (tested with v10.8.2) 
+- npm 10+ (tested with v10.8.2)
 - No additional build tools required for web development
 - Android SDK required only for mobile compilation
 - Xcode required only for iOS compilation
