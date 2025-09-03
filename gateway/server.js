@@ -63,7 +63,25 @@ app.post('/api/generate', async (req, res) => {
       return res.json({ text });
     } catch (e) {
       console.error('[gateway] ollama unreachable or failed:', e);
-      return res.status(502).json({ error: 'ollama_unreachable', detail: (e && e.message) || 'unreachable' });
+      // Return helpful message when AI document generation is unavailable
+      const fallbackResponse = `<!doctype html><html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+      <title>AI Service Unavailable</title>
+      <style>body{font-family: -apple-system, Segoe UI, Roboto, sans-serif; padding:16px; line-height:1.5; max-width:600px} h1{color:#dc2626} .info{background:#f3f4f6; padding:16px; border-radius:8px; margin:16px 0} .req{color:#374151} ul{margin:8px 0}</style>
+      </head><body>
+        <h1>AI Document Generation Unavailable</h1>
+        <div class="info">
+          <p><strong>Status:</strong> The AI document generation service is currently unavailable.</p>
+          <p class="req"><strong>For best results when service returns, please provide:</strong></p>
+          <ul>
+            <li>Complete property details (address, specifications, financial information)</li>
+            <li>Tenant information and lease terms</li>
+            <li>Specific document requirements and format preferences</li>
+            <li>Any custom clauses or terms needed</li>
+          </ul>
+          <p><em>Please try again later when the AI service is available.</em></p>
+        </div>
+      </body></html>`;
+      return res.json({ text: fallbackResponse });
     }
   } catch (e) {
     console.error('generate error', e);
@@ -360,7 +378,22 @@ CRITICAL REQUIREMENTS:
       
     } catch (e) {
       console.error('[gateway] portfolio analysis failed:', e);
-      return res.status(502).json({ error: 'ollama_unreachable', detail: (e && e.message) || 'unreachable' });
+      // Return fallback guidance message when AI is unreachable
+      const fallbackMessage = {
+        message: "AI portfolio analysis service is currently unavailable. Please ensure complete property data for future analysis.",
+        requiredDetails: [
+          "Property purchase prices and current market values",
+          "Complete monthly income and expense records",
+          "Property specifications (bedrooms, bathrooms, square footage)",
+          "Maintenance history and upcoming repair needs",
+          "Loan details including principal, interest rates, and payment schedules",
+          "Tenant information and lease terms",
+          "Local market comparable property data"
+        ],
+        note: "AI analytics requires complete property data to provide meaningful investment insights and recommendations.",
+        status: "Please try again later when the AI service is available."
+      };
+      return res.json({ analysis: fallbackMessage });
     }
     
   } catch (e) {
@@ -598,7 +631,20 @@ ANALYSIS REQUIREMENTS:
       
     } catch (e) {
       console.error('[gateway] maintenance prediction failed:', e);
-      return res.status(502).json({ error: 'ollama_unreachable', detail: (e && e.message) || 'unreachable' });
+      // Return fallback guidance message when AI is unreachable
+      const fallbackMessage = {
+        message: "AI maintenance prediction service is currently unavailable. Please ensure complete property data for future analysis.",
+        requiredDetails: [
+          "Property age, construction year, and building materials",
+          "Detailed maintenance expense records and service history", 
+          "Current condition of major systems (HVAC, plumbing, electrical, roofing)",
+          "Recent property inspection reports and warranty information",
+          "Appliance ages, brands, and maintenance schedules"
+        ],
+        note: "AI maintenance predictions rely on comprehensive historical data to forecast upcoming repair needs and costs accurately.",
+        status: "Please try again later when the AI service is available."
+      };
+      return res.json({ insights: [fallbackMessage] });
     }
     
   } catch (e) {
