@@ -80,7 +80,7 @@ Always reference these instructions first and fallback to search or bash command
 
 ### Commands That Work
 - `npm install` -- Install main app dependencies
-- `cd gateway && npm install` -- Install gateway dependencies  
+- `cd gateway && npm install` -- Install gateway dependencies
 - `npx tsc --noEmit` -- TypeScript compilation check
 - `npx expo start --web --localhost` -- Start development server
 - `cd gateway && node server.js` -- Start gateway service
