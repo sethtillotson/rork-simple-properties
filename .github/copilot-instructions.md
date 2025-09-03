@@ -116,7 +116,7 @@ Always reference these instructions first and fallback to search or bash command
 - **Add API services**: `services/`
 - **Add type definitions**: `types/`
 - **Modify gateway**: `gateway/server.js`
-- **Update configuration**: `app.json` for app config, `gateway/package.json` for gateway
+- **Update configuration**: `app.json` for app config, `gateway/k8s.yaml` for gateway deployment
 
 ### Testing Strategy
 - Manual testing via web browser at http://localhost:8081
