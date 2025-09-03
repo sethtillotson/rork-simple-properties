@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const fetch = require('node-fetch');
+// This code requires Node.js 18.0.0 or higher for native 'fetch' support. If you are using an earlier Node.js version, install and import a polyfill such as 'node-fetch' (e.g., 'npm install node-fetch') before using 'fetch'.
 
 // Comprehensive test data for enhanced portfolio analytics
 const mockPortfolioData = {
@@ -123,7 +123,7 @@ async function testPortfolioAnalytics() {
   console.log('🔍 Testing Enhanced Portfolio Analytics...\n');
   
   try {
-    const response = await fetch('http://10.43.101.6:8082/api/analyze-portfolio', {
+    const response = await fetch('http://localhost:8082/api/analyze-portfolio', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(mockPortfolioData)
@@ -137,63 +137,91 @@ async function testPortfolioAnalytics() {
     
     console.log('📊 Portfolio Analysis Results:');
     console.log('=====================================');
-    console.log(`Total Portfolio Value: $${result.analysis.totalValue.toLocaleString()}`);
-    console.log(`Monthly Cash Flow: $${result.analysis.totalCashFlow.toLocaleString()}`);
-    console.log(`Average ROI: ${(result.analysis.averageROI * 100).toFixed(2)}%`);
-    console.log(`Risk Score: ${(result.analysis.riskScore * 100).toFixed(1)}/100`);
     
-    console.log('\n💡 AI-Generated Insights:');
-    console.log('=====================================');
-    result.analysis.insights.forEach((insight, index) => {
-      console.log(`${index + 1}. ${insight.title} (${insight.type})`);
-      console.log(`   Priority: ${insight.priority.toUpperCase()}`);
-      console.log(`   ${insight.description}`);
-      if (insight.estimatedImpact.financial) {
-        console.log(`   💰 Financial Impact: $${insight.estimatedImpact.financial.toLocaleString()}`);
+    // Check if this is a fallback message or real analysis
+    if (result.analysis.message) {
+      console.log('📝 Fallback Message Received:');
+      console.log(`   ${result.analysis.message}`);
+      if (result.analysis.status) {
+        console.log(`   Status: ${result.analysis.status}`);
       }
-      if (insight.estimatedImpact.timeframe) {
-        console.log(`   ⏱️ Timeframe: ${insight.estimatedImpact.timeframe}`);
-      }
-      console.log(`   🎯 Confidence: ${(insight.confidence * 100).toFixed(1)}%`);
-      
-      if (insight.actionItems && insight.actionItems.length > 0) {
-        console.log('   📋 Action Items:');
-        insight.actionItems.forEach(action => console.log(`      • ${action}`));
-      }
-      console.log('');
-    });
-    
-    console.log('🎯 Recommendations:');
-    console.log('=====================================');
-    if (result.analysis.recommendations.buy.length > 0) {
-      console.log('🟢 BUY Opportunities:');
-      result.analysis.recommendations.buy.forEach(rec => console.log(`   • ${rec}`));
-    }
-    if (result.analysis.recommendations.sell.length > 0) {
-      console.log('🔴 SELL Considerations:');
-      result.analysis.recommendations.sell.forEach(rec => console.log(`   • ${rec}`));
-    }
-    if (result.analysis.recommendations.improve.length > 0) {
-      console.log('🔧 IMPROVE Opportunities:');
-      result.analysis.recommendations.improve.forEach(rec => console.log(`   • ${rec}`));
-    }
-    
-    // Check for quality indicators
-    const resultStr = JSON.stringify(result).toLowerCase();
-    if (resultStr.includes('lorem ipsum') || resultStr.includes('placeholder')) {
-      console.log('\n❌ Quality Check: Still contains placeholder text');
+      console.log('\n📋 Required Details for AI Analysis:');
+      result.analysis.requiredDetails.forEach(detail => {
+        console.log(`   • ${detail}`);
+      });
+      console.log(`\n💡 Note: ${result.analysis.note}`);
+      console.log('\n✅ Fallback message working correctly - no mock data provided');
     } else {
-      console.log('\n✅ Quality Check: No placeholder text detected - enhanced analytics working!');
+      // Handle real AI analysis response
+      console.log(`Total Portfolio Value: $${result.analysis.totalValue?.toLocaleString() || 'N/A'}`);
+      console.log(`Monthly Cash Flow: $${result.analysis.totalCashFlow?.toLocaleString() || 'N/A'}`);
+      console.log(`Average ROI: ${result.analysis.averageROI ? (result.analysis.averageROI * 100).toFixed(2) + '%' : 'N/A'}`);
+      console.log(`Risk Score: ${result.analysis.riskScore ? (result.analysis.riskScore * 100).toFixed(1) + '/100' : 'N/A'}`);
+      
+      console.log('\n💡 AI-Generated Insights:');
+      console.log('=====================================');
+      if (result.analysis.insights) {
+        result.analysis.insights.forEach((insight, index) => {
+          console.log(`${index + 1}. ${insight.title} (${insight.type})`);
+          console.log(`   Priority: ${insight.priority?.toUpperCase() || 'N/A'}`);
+          console.log(`   ${insight.description}`);
+          if (insight.estimatedImpact?.financial) {
+            console.log(`   💰 Financial Impact: $${insight.estimatedImpact.financial.toLocaleString()}`);
+          }
+          if (insight.estimatedImpact?.timeframe) {
+            console.log(`   ⏱️ Timeframe: ${insight.estimatedImpact.timeframe}`);
+          }
+          if (insight.confidence) {
+            console.log(`   🎯 Confidence: ${(insight.confidence * 100).toFixed(1)}%`);
+          }
+          
+          if (insight.actionItems && insight.actionItems.length > 0) {
+            console.log('   📋 Action Items:');
+            insight.actionItems.forEach(action => console.log(`      • ${action}`));
+          }
+          console.log('');
+        });
+      }
     }
     
-    // Check for sophisticated insights
-    if (result.analysis.insights.length > 1 && 
-        result.analysis.insights.some(i => i.type !== 'cash_flow')) {
-      console.log('✅ Diversity Check: Multiple insight types generated');
+    // Only show recommendations if this is real AI analysis (not a fallback message)
+    if (!result.analysis.message && result.analysis.recommendations) {
+      console.log('🎯 Recommendations:');
+      console.log('=====================================');
+      if (result.analysis.recommendations.buy && result.analysis.recommendations.buy.length > 0) {
+        console.log('🟢 BUY Opportunities:');
+        result.analysis.recommendations.buy.forEach(rec => console.log(`   • ${rec}`));
+      }
+      if (result.analysis.recommendations.sell && result.analysis.recommendations.sell.length > 0) {
+        console.log('🔴 SELL Considerations:');
+        result.analysis.recommendations.sell.forEach(rec => console.log(`   • ${rec}`));
+      }
+      if (result.analysis.recommendations.improve && result.analysis.recommendations.improve.length > 0) {
+        console.log('🔧 IMPROVE Opportunities:');
+        result.analysis.recommendations.improve.forEach(rec => console.log(`   • ${rec}`));
+      }
     }
     
-    if (result.analysis.insights.some(i => i.actionItems && i.actionItems.length > 1)) {
-      console.log('✅ Depth Check: Detailed action items provided');
+    // Check for quality indicators only if real analysis
+    if (!result.analysis.message) {
+      const resultStr = JSON.stringify(result).toLowerCase();
+      if (resultStr.includes('lorem ipsum') || resultStr.includes('placeholder')) {
+        console.log('\n❌ Quality Check: Still contains placeholder text');
+      } else {
+        console.log('\n✅ Quality Check: No placeholder text detected - enhanced analytics working!');
+      }
+      
+      // Check for sophisticated insights
+      if (result.analysis.insights && result.analysis.insights.length > 1 && 
+          result.analysis.insights.some(i => i.type !== 'cash_flow')) {
+        console.log('✅ Diversity Check: Multiple insight types generated');
+      }
+      
+      if (result.analysis.insights && result.analysis.insights.some(i => i.actionItems && i.actionItems.length > 1)) {
+        console.log('✅ Depth Check: Detailed action items provided');
+      }
+    } else {
+      console.log('\n✅ Fallback Check: No mock data returned - proper fallback message provided');
     }
     
   } catch (error) {
@@ -233,7 +261,7 @@ async function testMaintenancePrediction() {
   };
   
   try {
-    const response = await fetch('http://10.43.101.6:8082/api/predict-maintenance', {
+    const response = await fetch('http://localhost:8082/api/predict-maintenance', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(maintenanceData)
@@ -247,18 +275,44 @@ async function testMaintenancePrediction() {
     
     console.log('🔮 Maintenance Predictions:');
     console.log('=====================================');
+    
     result.insights.forEach((prediction, index) => {
-      console.log(`${index + 1}. ${prediction.title}`);
-      console.log(`   Priority: ${prediction.priority.toUpperCase()}`);
-      console.log(`   ${prediction.description}`);
-      if (prediction.estimatedImpact.financial) {
-        console.log(`   💰 Estimated Cost: $${prediction.estimatedImpact.financial.toLocaleString()}`);
+      // Check if this is a fallback message
+      if (prediction.message) {
+        console.log(`📝 Fallback Message Received:`);
+        console.log(`   ${prediction.message}`);
+        if (prediction.status) {
+          console.log(`   Status: ${prediction.status}`);
+        }
+        console.log('\n📋 Required Details for AI Analysis:');
+        prediction.requiredDetails.forEach(detail => {
+          console.log(`   • ${detail}`);
+        });
+        console.log(`\n💡 Note: ${prediction.note}`);
+        console.log('\n✅ Fallback message working correctly - no mock data provided');
+      } else {
+        // Handle real AI prediction response
+        console.log(`${index + 1}. ${prediction.title || 'N/A'}`);
+        if (prediction.priority) {
+          console.log(`   Priority: ${prediction.priority.toUpperCase()}`);
+        }
+        console.log(`   ${prediction.description || 'N/A'}`);
+        if (prediction.estimatedImpact?.financial) {
+          console.log(`   💰 Cost Estimate: $${Math.abs(prediction.estimatedImpact.financial).toLocaleString()}`);
+        }
+        if (prediction.estimatedImpact?.timeframe) {
+          console.log(`   ⏱️ Timeframe: ${prediction.estimatedImpact.timeframe}`);
+        }
+        if (prediction.confidence) {
+          console.log(`   🎯 Confidence: ${(prediction.confidence * 100).toFixed(1)}%`);
+        }
+        
+        if (prediction.actionItems && prediction.actionItems.length > 0) {
+          console.log('   📋 Action Items:');
+          prediction.actionItems.forEach(action => console.log(`      • ${action}`));
+        }
+        console.log('');
       }
-      if (prediction.estimatedImpact.timeframe) {
-        console.log(`   ⏱️ Timeframe: ${prediction.estimatedImpact.timeframe}`);
-      }
-      console.log(`   🎯 Confidence: ${(prediction.confidence * 100).toFixed(1)}%`);
-      console.log('');
     });
     
     console.log('✅ Maintenance prediction test completed!');
