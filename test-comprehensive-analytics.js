@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-// Use native fetch instead of node-fetch for Node.js 18+
+// Use native fetch (available in Node.js >= 18.0.0). For earlier versions, use a polyfill such as 'node-fetch'.
 
 // Comprehensive test data for enhanced portfolio analytics
 const mockPortfolioData = {
