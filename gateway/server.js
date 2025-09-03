@@ -63,25 +63,7 @@ app.post('/api/generate', async (req, res) => {
       return res.json({ text });
     } catch (e) {
       console.error('[gateway] ollama unreachable or failed:', e);
-      // Return helpful message when AI document generation is unavailable
-      const fallbackResponse = `<!doctype html><html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
-      <title>AI Service Unavailable</title>
-      <style>body{font-family: -apple-system, Segoe UI, Roboto, sans-serif; padding:16px; line-height:1.5; max-width:600px} h1{color:#dc2626} .info{background:#f3f4f6; padding:16px; border-radius:8px; margin:16px 0} .req{color:#374151} ul{margin:8px 0}</style>
-      </head><body>
-        <h1>AI Document Generation Unavailable</h1>
-        <div class="info">
-          <p><strong>Status:</strong> The AI document generation service is currently unavailable.</p>
-          <p class="req"><strong>For best results when service returns, please provide:</strong></p>
-          <ul>
-            <li>Complete property details (address, specifications, financial information)</li>
-            <li>Tenant information and lease terms</li>
-            <li>Specific document requirements and format preferences</li>
-            <li>Any custom clauses or terms needed</li>
-          </ul>
-          <p><em>Please try again later when the AI service is available.</em></p>
-        </div>
-      </body></html>`;
-      return res.json({ text: fallbackResponse });
+      return res.status(503).json({ text: fallbackResponse });
     }
   } catch (e) {
     console.error('generate error', e);
