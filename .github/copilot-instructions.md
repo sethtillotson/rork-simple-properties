@@ -48,7 +48,7 @@ Always reference these instructions first and fallback to search or bash command
 ```
 ├── app/                    # Expo Router pages
 │   ├── (tabs)/            # Tab-based navigation screens
-│   ├── documents/         # Document generation features  
+│   ├── documents/         # Document generation features
 │   └── property/          # Property management screens
 ├── components/            # Reusable UI components
 ├── services/              # API and data services
