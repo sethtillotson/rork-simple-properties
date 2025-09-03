@@ -11,7 +11,7 @@ import { useProperties } from '@/context/PropertiesContext';
 import { useDataService } from '@/hooks/useDataService';
 import type { Utility, Insurance, Tax, Loan, Property, Checklist } from '@/types/property';
 import { documentTemplates, type DocumentTemplate } from '@/utils/documentTemplates';
-import { buildDocVariables } from '@/utils/docVariables';
+import { generateDocumentPrompt } from '@/utils/promptTemplates';
 import { investmentAdvisor, InvestmentInsight } from '@/services/investmentAdvisorService';
 import { useFinancials } from '@/context/FinancialsContext';
 import { useMaintenance } from '@/context/MaintenanceContext';
@@ -995,13 +995,9 @@ export default function PropertyDetailsScreen() {
                       testID={`docTpl-${tpl.name.replace(/\s+/g, '-')}`}
                       onPress={() => {
                         const p = property as Property;
-                        const vars = buildDocVariables(p, undefined);
-                        const blocks: string[] = [];
-                        blocks.push(`# Task\nGenerate a professional real-estate document in VALID HTML based on the selected template and variables.`);
-                        blocks.push(`## Template (Markdown)\nName: ${tpl.name}\n---\n${tpl.content}`);
-                        blocks.push(`## Variables (JSON)\n${JSON.stringify(vars, null, 2)}`);
-                        blocks.push(`## Output Requirements\n- Return ONLY a complete HTML5 document starting with <!doctype html> and enclosing <html><head>...</head><body>...</body></html>.\n- Do NOT include any explanations, prefaces, or code fences in the response. Output the HTML document only.\n- Convert any Markdown in the template to styled HTML (use <h1>-<h3>, <p>, <ul>, <li>, <strong>, <em>, <table> if needed).\n- Interpolate variables where appropriate; if a variable is missing, leave a bracketed placeholder.\n- No external scripts. Inline minimal CSS in <style> is allowed.\n- Mobile-friendly formatting.`);
-                        const prompt = blocks.join('\n\n');
+                        const prompt = generateDocumentPrompt(tpl, p, undefined, {
+                          allowExternalScripts: false
+                        });
                         setDocModalVisible(false);
                         router.push({ pathname: '/documents/viewer', params: { prompt } });
                       }}

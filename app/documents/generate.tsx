@@ -7,20 +7,12 @@ import { useDocumentTemplates } from '@/context/DocumentTemplatesContext';
 import { useProperties } from '@/context/PropertiesContext';
 import { useTenants } from '@/context/TenantsContext';
 import { generateDocument } from '@/services/onDeviceAiService';
-import { buildDocVariables } from '@/utils/docVariables';
+import { generateDocumentPrompt } from '@/utils/promptTemplates';
 
 interface Params {
   templateId?: string;
   propertyId?: string;
   tenantId?: string;
-}
-
-function stringify(obj: unknown): string {
-  try {
-    return JSON.stringify(obj ?? null, null, 2);
-  } catch {
-    return String(obj);
-  }
 }
 
 export default function GenerateDocumentScreen() {
@@ -47,16 +39,13 @@ export default function GenerateDocumentScreen() {
 
   useEffect(() => {
     const constructPrompt = () => {
-      const blocks: string[] = [];
-      const vars = buildDocVariables(property, tenant);
-      blocks.push(`# Task\nGenerate a professional real-estate document in VALID HTML based on the selected template and variables.`);
-      blocks.push(`## Template (Markdown)\nName: ${template?.name ?? 'Unknown'}\n---\n${template?.content ?? ''}`);
-      blocks.push(`## Variables (JSON)\n${stringify(vars)}`);
-  blocks.push(`## Output Requirements\n- Return ONLY a complete HTML5 document starting with <!doctype html> and enclosing <html><head>...</head><body>...</body></html>.\n- Do NOT include any explanations, prefaces, or code fences in the response. Output the HTML document only.\n- Convert any Markdown in the template to styled HTML (use <h1>-<h3>, <p>, <ul>, <li>, <strong>, <em>, <table> if needed).\n- Interpolate variables where appropriate; if a variable is missing, leave a bracketed placeholder like [TENANT_NAME].\n- Use semantic, mobile-friendly formatting and reasonable spacing.`);
-      return blocks.join('\n\n');
+      if (!template) return '';
+      return generateDocumentPrompt(template, property, tenant, { 
+        useSpecificPlaceholders: true 
+      });
     };
     setPrompt(constructPrompt());
-  }, [template?.name, template?.content, property, tenant]);
+  }, [template, property, tenant]);
 
   useEffect(() => {
     let cancelled = false;
